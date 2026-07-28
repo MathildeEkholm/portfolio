@@ -7,9 +7,6 @@ type DocumentModalProps = {
   pdfSrc: string;
   alt: string;
   onClose: () => void;
-  /** Renders the document on a translucent frosted panel instead of solid white.
-   *  Requires imageSrc to have a transparent background. */
-  glass?: boolean;
 };
 
 export default function DocumentModal({
@@ -17,7 +14,6 @@ export default function DocumentModal({
   pdfSrc,
   alt,
   onClose,
-  glass = false,
 }: DocumentModalProps) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -81,21 +77,12 @@ export default function DocumentModal({
       </div>
 
       <div className="flex h-full items-start justify-center overflow-y-auto p-4 pt-5 sm:p-8 sm:pt-6">
-        {glass ? (
-          <div
-            onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-2xl animate-modal-in overflow-hidden rounded-2xl bg-white/80 shadow-2xl ring-1 ring-white/40 backdrop-blur-2xl"
-          >
-            <img src={imageSrc} alt={alt} className="w-full" />
-          </div>
-        ) : (
-          <img
-            src={imageSrc}
-            alt={alt}
-            onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-2xl animate-modal-in rounded-2xl bg-white shadow-2xl"
-          />
-        )}
+        <img
+          src={imageSrc}
+          alt={alt}
+          onClick={(event) => event.stopPropagation()}
+          className="w-full max-w-2xl animate-modal-in rounded-2xl bg-white shadow-2xl"
+        />
       </div>
     </div>
   );

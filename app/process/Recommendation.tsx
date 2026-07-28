@@ -21,7 +21,7 @@ export default function Recommendation() {
         {excerpt}
       </blockquote>
       <figcaption className="mt-6 text-lg leading-relaxed text-ink-subtle">
-        Lisa Heineke, Brand &amp; Marketing Manager at EMBACO Global A/S
+        Brand &amp; Marketing Manager at EMBACO Global A/S
       </figcaption>
       <button
         type="button"
@@ -46,10 +46,9 @@ export default function Recommendation() {
 
       {open && (
         <DocumentModal
-          glass
-          imageSrc="/documents/embaco-reference-glass.png"
-          pdfSrc="/documents/Engelsk_EMBACO_Reference_2026.pdf"
-          alt="Letter of recommendation for Mathilde Ekholm from Lisa Heineke, Brand & Marketing Manager at EMBACO Global A/S"
+          imageSrc="/documents/recommendation-mathilde-embaco.png"
+          pdfSrc="/documents/recommendation-mathilde-embaco.pdf"
+          alt="Letter of recommendation for Mathilde Ekholm from the Brand & Marketing Manager at EMBACO Global A/S"
           onClose={() => setOpen(false)}
         />
       )}

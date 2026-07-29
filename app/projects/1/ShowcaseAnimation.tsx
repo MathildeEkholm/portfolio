@@ -5,7 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import styles from "./showcase.module.css";
 
-// Reports false while server-rendering and during hydration, then true — the
+// Reports false while server-rendering and during hydration, then true, the
 // standard way to gate browser-only work without a state update in an effect.
 const noopSubscribe = () => () => {};
 const getMounted = () => true;
@@ -65,11 +65,11 @@ export default function ShowcaseAnimation() {
   const stageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   // Panels are portaled to document.body (see render below) so they escape
-  // the 3D-transformed .screenContainer/.stage ancestors entirely — Chromium
-  // and WebKit fail to composite backdrop-filter blur on a descendant of an
-  // element with an active perspective/rotate transform, which is exactly
-  // what scroll + cursor-tilt apply here. Portals need `document`, so they
-  // only render once mounted on the client.
+  // the 3D-transformed .screenContainer/.stage ancestors entirely, because
+  // Chromium and WebKit fail to composite backdrop-filter blur on a
+  // descendant of an element with an active perspective/rotate transform,
+  // which is exactly what scroll + cursor-tilt apply here. Portals need
+  // `document`, so they only render once mounted on the client.
   const mounted = useSyncExternalStore(
     noopSubscribe,
     getMounted,

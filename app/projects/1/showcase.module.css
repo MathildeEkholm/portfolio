@@ -42,12 +42,12 @@
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   /* Corners are already rounded in the source PNG's alpha channel (iPhone
-     shape) — no border-radius here, and a drop-shadow (not box-shadow) so
+     shape), so no border-radius here, and a drop-shadow (not box-shadow) so
      the shadow hugs that shape instead of drawing a rectangle behind it. */
   filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.16));
 }
 
-/* Glass panel overlay (Challenges screen) — dropdown with actions.
+/* Glass panel overlay (Challenges screen), a dropdown with actions.
    Rendered via a portal to document.body (see ShowcaseAnimation), so it's
    position: fixed with left/top synced in JS every frame.
 

@@ -47,6 +47,8 @@ export default function Recommendation() {
       {open && (
         <DocumentModal
           imageSrc="/documents/recommendation-mathilde-embaco.png"
+          imageWidth={1696}
+          imageHeight={2400}
           pdfSrc="/documents/recommendation-mathilde-embaco.pdf"
           alt="Letter of recommendation for Mathilde Ekholm from the Brand & Marketing Manager at EMBACO Global A/S"
           onClose={() => setOpen(false)}

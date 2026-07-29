@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import SiteHeader from "../../components/SiteHeader";
 import { projects } from "../data";
@@ -39,11 +40,14 @@ export default function ProjectDetail() {
             <p className="mt-4 text-lg text-ink-subtle">{project.year}</p>
           </div>
 
-          <div className="mb-16 overflow-hidden rounded-2xl bg-surface-muted">
-            <img
+          <div className="relative mb-16 aspect-video overflow-hidden rounded-2xl bg-surface-muted">
+            <Image
               src={project.image}
               alt={project.title}
-              className="h-full w-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
             />
           </div>
 

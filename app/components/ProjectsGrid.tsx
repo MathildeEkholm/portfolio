@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { projectList } from "../projects/data";
 
@@ -11,10 +12,12 @@ export default function ProjectsGrid() {
           className="group flex flex-col"
         >
           <div className="relative mb-6 aspect-video overflow-hidden rounded-2xl bg-surface-muted">
-            <img
+            <Image
               src={project.image}
               alt={project.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
           <p className="text-sm font-medium tracking-[0.09em] text-brand-soft uppercase">

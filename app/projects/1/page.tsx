@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SiteHeader from "../../components/SiteHeader";
 import ShowcaseAnimation from "./ShowcaseAnimation";
 
@@ -54,10 +55,13 @@ export default function StravaCaseStudy() {
           <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
             {mockups.map((mockup) => (
               <figure key={mockup.label}>
-                <img
+                <Image
                   src={mockup.src}
                   alt={`${mockup.label} screen of the Strava redesign`}
-                  className="w-full drop-shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
+                  width={804}
+                  height={1748}
+                  sizes="(max-width: 768px) 50vw, 240px"
+                  className="h-auto w-full drop-shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
                 />
                 <figcaption className="mt-4 text-center text-sm font-medium text-ink">
                   {mockup.label}
@@ -169,9 +173,12 @@ export default function StravaCaseStudy() {
               </p>
             </div>
             <figure className="mt-10">
-              <img
+              <Image
                 src="/images/strava/codesign-workshop.png"
                 alt="Co-design workshop materials"
+                width={1810}
+                height={1320}
+                sizes="(max-width: 1024px) 100vw, 960px"
                 className="h-auto w-full rounded-2xl object-cover md:h-[480px]"
               />
               <figcaption className="mt-4 text-sm text-ink-subtle">
@@ -182,10 +189,13 @@ export default function StravaCaseStudy() {
 
           <div className="mt-16 grid grid-cols-1 items-center gap-10 md:grid-cols-2">
             <figure className="md:order-first">
-              <img
+              <Image
                 src="/images/strava/personalized-concept.png"
                 alt="Personalized concept redesign"
-                className="w-full rounded-2xl"
+                width={1200}
+                height={1200}
+                sizes="(max-width: 768px) 100vw, 460px"
+                className="h-auto w-full rounded-2xl"
               />
               <figcaption className="mt-4 text-sm text-ink-subtle">
                 Personalized redesign concept developed with one of the

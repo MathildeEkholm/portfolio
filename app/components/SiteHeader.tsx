@@ -189,6 +189,8 @@ export default function SiteHeader() {
       {resumeOpen && (
         <DocumentModal
           imageSrc="/documents/resume.png"
+          imageWidth={1696}
+          imageHeight={2400}
           pdfSrc="/documents/mathilde-ekholm-resume.pdf"
           alt="Resume of Mathilde Ekholm, Product Designer"
           onClose={() => setResumeOpen(false)}

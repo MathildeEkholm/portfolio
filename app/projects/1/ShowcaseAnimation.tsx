@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import styles from "./showcase.module.css";
@@ -292,7 +293,15 @@ export default function ShowcaseAnimation() {
                   stageRefs.current[i] = el;
                 }}
               >
-                <img src={screen.src} alt={screen.alt} />
+                {/* Rendered size comes from `.stage img` in the CSS module,
+                    which overrides these intrinsic dimensions. */}
+                <Image
+                  src={screen.src}
+                  alt={screen.alt}
+                  width={804}
+                  height={1748}
+                  sizes="(max-width: 480px) 230px, (max-width: 1024px) 260px, 300px"
+                />
               </div>
             </div>
             <div className={styles.textContainer}>
@@ -315,7 +324,16 @@ export default function ShowcaseAnimation() {
                 className={styles.glassPanel}
               >
                 <div className={styles.panelBackdrop}>
-                  <img src={screen.src} alt="" aria-hidden="true" />
+                  {/* Blurred copy of the screen behind the glass. positionPanel()
+                      sets its width/height/transform inline each frame. */}
+                  <Image
+                    src={screen.src}
+                    alt=""
+                    aria-hidden="true"
+                    width={804}
+                    height={1748}
+                    sizes="300px"
+                  />
                 </div>
                 <div className={styles.panelTint} />
                 <div className={styles.glassOptionPrimary}>

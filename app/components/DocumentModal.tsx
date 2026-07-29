@@ -1,9 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 
 type DocumentModalProps = {
   imageSrc: string;
+  // Intrinsic pixel size of imageSrc, so the modal reserves the right space
+  // before the scan loads.
+  imageWidth: number;
+  imageHeight: number;
   pdfSrc: string;
   alt: string;
   onClose: () => void;
@@ -11,6 +16,8 @@ type DocumentModalProps = {
 
 export default function DocumentModal({
   imageSrc,
+  imageWidth,
+  imageHeight,
   pdfSrc,
   alt,
   onClose,
@@ -77,11 +84,14 @@ export default function DocumentModal({
       </div>
 
       <div className="flex h-full items-start justify-center overflow-y-auto p-4 pt-5 sm:p-8 sm:pt-6">
-        <img
+        <Image
           src={imageSrc}
           alt={alt}
+          width={imageWidth}
+          height={imageHeight}
+          sizes="(max-width: 672px) 100vw, 672px"
           onClick={(event) => event.stopPropagation()}
-          className="w-full max-w-2xl animate-modal-in rounded-2xl bg-white shadow-2xl"
+          className="h-auto w-full max-w-2xl animate-modal-in rounded-2xl bg-white shadow-2xl"
         />
       </div>
     </div>

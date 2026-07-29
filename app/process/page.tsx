@@ -53,10 +53,10 @@ export default function Process() {
                   I design digital products by simplifying complex systems into clear, usable experiences.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  My work follows the Design Thinking methodology — empathise, define, ideate, prototype and test. In practice it is rarely linear: I move between understanding users, framing the problem and testing ideas, letting each round of feedback reshape the direction.
+                  My work follows the Design Thinking methodology: empathise, define, ideate, prototype and test. In practice it is rarely linear: I move between understanding users, framing the problem and testing ideas, letting each round of feedback reshape the direction.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  I use AI as a thinking partner throughout — synthesising research, exploring more concepts than I could alone and building prototypes faster — while the decisions stay grounded in what real users need.
+                  I use AI as a thinking partner throughout, synthesising research, exploring more concepts than I could alone and building prototypes faster, while the decisions stay grounded in what real users need.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
                   I combine research, prototyping and continuous testing to move from insight to working solutions.

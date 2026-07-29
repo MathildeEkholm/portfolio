@@ -80,7 +80,7 @@ export default function StravaCaseStudy() {
               <p className="mt-4 text-lg leading-relaxed text-ink-muted">
                 Strava&apos;s standardized interface doesn&apos;t reflect how
                 different users engage with fitness. Users have varying
-                motivations—some are coach-guided athletes, others are
+                motivations, some are coach-guided athletes, others are
                 competitive, solo achievement trackers, or socially motivated.
               </p>
             </div>
@@ -144,7 +144,7 @@ export default function StravaCaseStudy() {
               interfaces that fail to accommodate the diversity of individual
               users. While users engage for motivation and self-improvement,
               their needs and relationships to data vary
-              significantly—creating a gap between user and technology that
+              significantly, creating a gap between user and technology that
               reduces motivation and relevance.
             </p>
           </div>
@@ -222,8 +222,10 @@ export default function StravaCaseStudy() {
                 <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-brand" />
                 <p className="text-lg leading-relaxed text-ink-muted">
                   <span className="font-medium text-ink">Product Impact:</span>{" "}
-                  Further validation would explore how personalization
+                  With the new design, I explored how the personalized
                   concepts can be integrated into one cohesive experience.
+                  Further validation would test how well that direction holds
+                  up in real use.
                 </p>
               </li>
             </ul>

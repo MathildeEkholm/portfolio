@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Mathilde Ekholm — Product Designer",
+  title: "Mathilde Ekholm, Product Designer",
   description:
     "Product designer simplifying complex systems into intuitive, research-driven experiences. Selected work in UX, UI and AI-assisted design.",
 };

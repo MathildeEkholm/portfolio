@@ -26,10 +26,14 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile menu whenever the route changes.
-  useEffect(() => {
+  // Close the mobile menu whenever the route changes. Adjusting during render
+  // rather than in an effect closes it in the same pass as the navigation, so
+  // the open menu never paints over the new page.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
     setMenuOpen(false);
-  }, [pathname]);
+  }
 
   const isActive = (href: string) =>
     href === "/"

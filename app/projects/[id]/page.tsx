@@ -123,7 +123,7 @@ export default function ProjectDetail() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="rounded-2xl bg-surface-muted p-8 sm:p-12">
             <p className="mb-6 text-lg leading-relaxed text-ink-muted">
-              "{project.testimonial}"
+              &ldquo;{project.testimonial}&rdquo;
             </p>
             <p className="text-lg text-ink-subtle">
               Client / Stakeholder

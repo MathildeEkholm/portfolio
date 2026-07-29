@@ -19,7 +19,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full scroll-smooth antialiased`}>
+    // The script below adds `dark` to this element before React hydrates, so
+    // the DOM class list intentionally differs from what the server rendered.
+    <html
+      lang="en"
+      className={`${inter.variable} h-full scroll-smooth antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{

@@ -472,6 +472,14 @@
     .panel { overflow-y: visible; }
   }
 
+  /* On a phone a 900px canvas means seeing about a third of the diagram, which
+     reads as being zoomed in rather than as something to scroll. Fit it to the
+     screen instead so the whole composition is legible; pinch to zoom for detail. */
+  @media (max-width: 700px) {
+    .canvas-scroll { overflow-x: hidden; }
+    svg#net { width: 100%; height: auto; aspect-ratio: 960 / 820; flex: 1 1 auto; }
+  }
+
   @media (max-width: 620px) {
     .topbar { flex-wrap: wrap; gap: 10px 14px; }
     .panel { padding: 20px 18px 40px; }

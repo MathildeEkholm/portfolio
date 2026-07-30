@@ -176,6 +176,12 @@
     width: 100%;
     justify-content: center;
     min-height: 0;
+    /* The scroll-in animation is tuned for the two-column desktop layout and
+       never completes once the columns stack, which left the screens stuck at
+       opacity 0. Show them outright here, the same way .textContainer already
+       does. !important because the scroll handler writes inline styles. */
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .textContainer {

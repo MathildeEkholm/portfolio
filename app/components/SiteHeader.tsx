@@ -106,7 +106,10 @@ export default function SiteHeader() {
       </div>
 
       {/* Mobile: logo + menu button; nav and theme toggle live in the dropdown. */}
-      <div className="relative mx-auto flex max-w-5xl items-center justify-between px-5 sm:px-8 md:hidden">
+      {/* z-50 because the header carries a negative bottom margin, so the next
+          section overlaps it. Chrome paints the header on top regardless, but
+          iOS is less predictable, and an intercepted tap looks like a dead button. */}
+      <div className="relative z-50 mx-auto flex max-w-5xl items-center justify-between px-5 sm:px-8 md:hidden">
         {logo}
 
         <button
@@ -114,7 +117,8 @@ export default function SiteHeader() {
           onClick={() => setMenuOpen((open) => !open)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
-          className={`flex h-13 w-13 cursor-pointer items-center justify-center rounded-full text-brand ${glassHover}`}
+          style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+          className={`relative z-50 flex h-13 w-13 cursor-pointer items-center justify-center rounded-full text-brand ${glassHover}`}
         >
           {menuOpen ? (
             <svg
@@ -146,7 +150,7 @@ export default function SiteHeader() {
         </button>
 
         {menuOpen && (
-          <div className="absolute left-5 right-5 top-full mt-3 rounded-2xl bg-glass p-2 shadow-lg shadow-black/10 ring-1 ring-line-soft backdrop-blur-xl backdrop-saturate-150 sm:left-8 sm:right-8">
+          <div className="absolute left-5 right-5 top-full z-50 mt-3 rounded-2xl bg-glass p-2 shadow-lg shadow-black/10 ring-1 ring-line-soft backdrop-blur-xl backdrop-saturate-150 sm:left-8 sm:right-8">
             <nav>
               <ul className="flex flex-col gap-1">
                 {navLinks.map((link) => (

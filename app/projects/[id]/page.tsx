@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import SiteHeader from "../../components/SiteHeader";
+import LoomEmbed from "../../components/LoomEmbed";
 import { projects } from "../data";
 
 export default function ProjectDetail() {
@@ -38,18 +39,56 @@ export default function ProjectDetail() {
               {project.title}
             </h1>
             <p className="mt-4 text-lg text-ink-subtle">{project.year}</p>
+
+            {project.question && (
+              <p className="mt-8 max-w-3xl text-2xl leading-snug text-ink-muted sm:text-3xl">
+                {project.question}
+              </p>
+            )}
+
+            {(project.role || project.engagement || project.research) && (
+              <div className="mt-10 flex flex-wrap gap-x-16 gap-y-6 border-t border-black/5 pt-8">
+                {project.role && (
+                  <div>
+                    <p className="text-xs font-medium tracking-[0.12em] text-ink-subtle uppercase">
+                      Role
+                    </p>
+                    <p className="mt-2 text-base text-ink-muted">
+                      {project.role.join(", ")}
+                    </p>
+                  </div>
+                )}
+                {project.engagement && (
+                  <div>
+                    <p className="text-xs font-medium tracking-[0.12em] text-ink-subtle uppercase">
+                      Engagement
+                    </p>
+                    <p className="mt-2 text-base text-ink-muted">
+                      {project.engagement}
+                    </p>
+                  </div>
+                )}
+                {project.research && (
+                  <div>
+                    <p className="text-xs font-medium tracking-[0.12em] text-ink-subtle uppercase">
+                      Research basis
+                    </p>
+                    <p className="mt-2 max-w-xs text-base text-ink-muted">
+                      {project.research}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="relative mb-16 aspect-video overflow-hidden rounded-2xl bg-surface-muted">
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-cover"
-            />
-          </div>
+          {/* The real prototype, embedded so visitors can drive it. Project 1
+              has its own page, so this route only renders LOOM. */}
+          <LoomEmbed
+            src="/loom/index.html"
+            poster={project.image}
+            alt={project.title}
+          />
 
           <div className="grid grid-cols-1 gap-16 md:grid-cols-2">
             <div>
@@ -81,24 +120,46 @@ export default function ProjectDetail() {
                   </li>
                 ))}
               </ul>
-
-              <h3 className="mb-6 mt-12 text-xl font-semibold text-brand">
-                Tools & Technologies
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {project.tools.map((tool) => (
-                  <span
-                    key={tool}
-                    className="rounded-full bg-surface-muted px-4 py-2 text-sm text-ink"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {project.decisions && (
+        <section className="bg-surface pb-20">
+          <div className="mx-auto max-w-5xl px-5 sm:px-8">
+            <h2 className="text-3xl font-semibold text-brand">
+              Design decisions
+            </h2>
+            <p className="mt-3 max-w-2xl text-lg text-ink-subtle">
+              Each of these is live in the prototype above.
+            </p>
+            <div className="mt-12 grid grid-cols-1 gap-x-16 gap-y-12 md:grid-cols-2">
+              {project.decisions.map((decision) => (
+                <div key={decision.title}>
+                  {decision.image && (
+                    <div className="relative mb-5 aspect-[2/1] overflow-hidden rounded-xl border border-black/5 bg-surface-muted">
+                      <Image
+                        src={decision.image}
+                        alt={`${decision.title}, shown in the LOOM prototype`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 480px"
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <h3 className="text-xl font-semibold text-brand">
+                    {decision.title}
+                  </h3>
+                  <p className="mt-3 text-lg leading-relaxed text-ink-muted">
+                    {decision.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="bg-surface-muted py-20">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -119,19 +180,6 @@ export default function ProjectDetail() {
                 <p className="text-lg text-ink-muted">{step.description}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-surface py-20">
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="rounded-2xl bg-surface-muted p-8 sm:p-12">
-            <p className="mb-6 text-lg leading-relaxed text-ink-muted">
-              &ldquo;{project.testimonial}&rdquo;
-            </p>
-            <p className="text-lg text-ink-subtle">
-              Client / Stakeholder
-            </p>
           </div>
         </div>
       </section>

@@ -1,19 +1,31 @@
 export type ProcessStep = { title: string; description: string };
 
+// A concrete interface decision and what it argues, so the case study points at
+// the design rather than only describing the philosophy behind it.
+export type Decision = { title: string; description: string; image?: string };
+
 export type Project = {
   id: number;
   title: string;
   category: string;
   year: string;
   description: string;
+  // Optional so the existing case is unaffected
+  question?: string;
+  role?: string[];
+  engagement?: string;
+  research?: string;
+  decisions?: Decision[];
   overview: string;
   problem: string;
   solution: string;
   results: string[];
   image: string;
+  // Shown on the overview page, framed in a device mock
+  cover: string;
+  coverDevice: "phone" | "laptop";
   process: ProcessStep[];
   tools: string[];
-  testimonial: string;
 };
 
 export const projects: Record<string, Project> = {
@@ -37,6 +49,8 @@ export const projects: Record<string, Project> = {
       "Successfully onboarded 15+ research participants",
     ],
     image: "/images/strava/codesign-workshop.png",
+    cover: "/images/strava/01-training.png",
+    coverDevice: "phone",
     process: [
       {
         title: "Research & Discovery",
@@ -60,54 +74,6 @@ export const projects: Record<string, Project> = {
       },
     ],
     tools: ["Figma", "Miro", "Adobe XD", "UserTesting"],
-    testimonial:
-      "Mathilde's collaborative approach transformed how we think about product design. The co-design sessions were invaluable in creating a product our users truly love.",
-  },
-  "2": {
-    id: 2,
-    title: "Conversational AI for Elderly Users",
-    category: "Accessibility Design",
-    year: "2023",
-    description:
-      "Accessibility-focused interface design for elderly user engagement",
-    overview:
-      "Designing an accessible interface for a conversational AI platform specifically tailored to elderly users. This project prioritizes clarity, simplicity, and accessibility to create a welcoming experience for users aged 65+.",
-    problem:
-      "Existing AI interfaces were designed for tech-savvy users and posed significant accessibility challenges for elderly users. Small text, complex navigation, and unclear language created barriers to adoption.",
-    solution:
-      "I designed a simplified, accessible interface with large typography, high contrast, clear language, and intuitive navigation. Every design decision was validated through user testing with elderly participants.",
-    results: [
-      "Successfully tested with 50+ elderly users",
-      "WCAG AAA accessibility compliance",
-      "95% task completion rate in user testing",
-      "Positive feedback from elderly user group advocates",
-    ],
-    image: "/images/project-2.svg",
-    process: [
-      {
-        title: "Accessibility Audit",
-        description:
-          "Conducted thorough accessibility audit of existing interfaces, identifying specific barriers for elderly users.",
-      },
-      {
-        title: "Simplified Design System",
-        description:
-          "Created a design system prioritizing large typography, high contrast, clear language, and reduced cognitive load.",
-      },
-      {
-        title: "Inclusive User Testing",
-        description:
-          "Conducted extensive testing with elderly participants to validate design choices and accessibility improvements.",
-      },
-      {
-        title: "Documentation & Guidelines",
-        description:
-          "Created comprehensive accessibility guidelines to ensure ongoing compliance and future design consistency.",
-      },
-    ],
-    tools: ["Figma", "WAVE", "Axe DevTools", "Lighthouse"],
-    testimonial:
-      "This design proves that accessibility doesn't require compromise. The interface is beautiful, intuitive, and truly serves its users.",
   },
   "3": {
     id: 3,
@@ -116,44 +82,69 @@ export const projects: Record<string, Project> = {
     year: "2026",
     description:
       "A conceptual AI-powered workspace exploring how AI can facilitate organizational sensemaking",
-    overview:
-      "LOOM is a conceptual AI-powered workspace designed to support organizational sensemaking rather than information retrieval. Organizations generate vast amounts of information every day, yet meaningful knowledge often remains fragmented across conversations, documents, meetings and teams. While traditional AI tools excel at summarizing information, they rarely help people understand how relationships, perspectives and organizational dynamics shape decision-making. LOOM explores how AI can augment human interpretation while preserving uncertainty, context and collaboration.",
-    problem:
-      "Organizations have access to more data than ever before, but understanding what it actually means remains difficult. Customer feedback, retrospectives, Slack conversations and research are often stored in different places. AI can summarize information, but rarely helps teams build a shared understanding. Traditional AI-assisted products try to reduce uncertainty and provide definitive answers, which doesn't align with how organizational challenges actually work.",
-    solution:
-      "I developed LOOM as a living network of relationships where fragmented observations evolve into shared understanding. Instead of generating definitive answers, LOOM helps teams discover emerging signals, explore multiple perspectives and build shared understanding through facilitated collaboration. The design philosophy positions AI as a facilitator that helps organizations navigate complexity together, rather than replacing human judgment.",
-    results: [
-      "Created custom visual language built from primitive elements",
-      "Developed relationships-centered interaction model",
-      "Established coherent design system reflecting organizational sensemaking philosophy",
-      "Demonstrated alternative approach to AI-assisted knowledge work",
+    question:
+      "How might AI help teams build shared understanding instead of simply generating answers?",
+    role: [
+      "Product Designer",
+      "UX Researcher",
+      "Interaction Designer",
+      "Visual Designer",
     ],
-    image: "/images/project-3.svg",
+    engagement: "Independent product concept",
+    research: "Master's thesis research, covered by a confidentiality agreement",
+    decisions: [
+      {
+        title: "Missing perspectives",
+        image: "/images/loom/loom-missing-perspectives.png",
+        description:
+          "The interface reports what it does not know. Sales and Customer sit as visibly empty sectors on the canvas, and every signal lists the viewpoints its reading excludes. Most AI products hide their coverage gaps, because gaps undercut the impression of completeness.",
+      },
+      {
+        title: "One possible interpretation",
+        image: "/images/loom/loom-one-possible-interpretation.png",
+        description:
+          "The label does the arguing. Readings are offered for discussion rather than presented as conclusions, and the AI keeps a hedged voice throughout: a pattern may be related, you may want to compare these perspectives. When two groups describe the same thing differently, that difference is kept and named rather than resolved away.",
+      },
+      {
+        title: "Claims you can audit",
+        image: "/images/loom/loom-claims-you-can-audit.png",
+        description:
+          "Every AI insight links back to the evidence beneath it. Clicking show me highlights the specific observations a claim rests on, one per source group, so the reader can check the reasoning instead of trusting it.",
+      },
+      {
+        title: "The box the AI leaves empty",
+        image: "/images/loom/loom-shared-interpretation-full.png",
+        description:
+          "In a sensemaking session, the most important field in the product is the one the system deliberately does not fill in. LOOM gathers the evidence; the team writes what it means. Experiments are framed as small tests to learn more, explicitly not as actions or recommendations.",
+      },
+    ],
+    overview:
+      "LOOM is a conceptual AI-powered workspace designed to support organizational sensemaking rather than information retrieval. It explores how AI can augment human interpretation while preserving uncertainty, context and collaboration.",
+    problem:
+      "Customer feedback, retrospectives, Slack conversations and research sit in different places, and AI tools summarize them without showing how relationships and perspectives shape a decision. They optimize for certainty, which is the wrong instinct for problems that are genuinely ambiguous.",
+    solution:
+      "Instead of a dashboard, LOOM visualizes knowledge as a network of relationships: observations connect to emerging signals, and perspectives supply the context teams need to interpret them together. I designed it with AI as a collaborator, using Figma Make and AI-assisted exploration for the visual language, which put me in the same relationship to AI that the product proposes: a partner in interpretation rather than a source of answers.",
+    results: [
+      "A relationship-centered interaction model where the network itself becomes the primary interface",
+      "The LOOM Design Language, a visual grammar built from primitive elements that unifies branding, interface and interaction",
+      "A concept in which uncertainty, multiple perspectives and organizational relationships are first-class design elements rather than problems to eliminate",
+    ],
+    image: "/images/loom/knowledge-network-16x10.png",
+    cover: "/images/loom/knowledge-network-16x10.png",
+    coverDevice: "laptop",
     process: [
       {
         title: "Research",
         description:
-          "Explored organizational sensemaking, AI-assisted collaboration, complex sociotechnical systems, Actor-Network Theory, knowledge visualization, and collaborative decision-making. Emphasized relationships between people, systems and organizational processes.",
-      },
-      {
-        title: "Concept Development",
-        description:
-          "Defined product philosophy and created the LOOM Design Language. Developed visual grammar built around relationships, signals and perspectives. Reimagined AI as a facilitator of understanding rather than provider of answers.",
-      },
-      {
-        title: "Product Design",
-        description:
-          "Designed workspace architecture, interaction model centered around a living knowledge network, information hierarchy, network visualization, motion principles, and UI components built from primitive visual elements. Made relationships the primary navigation model.",
+          "LOOM builds on research insights from my master's thesis, carried out with an industry partner. That study is covered by a confidentiality agreement and cannot be shown here, so this case presents the design thinking it informed rather than the underlying research. The work draws on organizational sensemaking, AI-assisted collaboration, complex sociotechnical systems, Actor-Network Theory and knowledge visualization, and on the relationships between people, systems and organizational processes.",
       },
       {
         title: "Iteration & Reflection",
         description:
-          "Continuously refined the concept to communicate relationships instead of metrics, shared understanding instead of certainty, and human interpretation instead of AI automation.",
+          "The concept went through three iterations. The first was a narrative, evidence-first flow built around attributed quotes and the perspectives a reading was missing. The second replaced it with a spatial knowledge network, which made relationships visible but lost the evidence trail that made the first version trustworthy. The current design is a synthesis of both: position encodes whose perspective a signal comes from, while every claim still links back to the observations beneath it.",
       },
     ],
     tools: ["Figma", "Figma Make", "AI-assisted Design Exploration"],
-    testimonial:
-      "LOOM demonstrates an alternative approach to AI-assisted knowledge work. Instead of optimizing for speed or automation, it explores how AI can support collective interpretation and reveal organizational relationships.",
   },
 };
 

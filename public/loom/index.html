@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LOOM — Knowledge Network</title>
+<style>
+  /* ---------------- theme ---------------- */
+  :root {
+    --paper:        #F6F6F2;
+    --canvas:       #FAFAF8;
+    --surface:      #FFFFFF;
+    --line:         #E6E6DF;
+    --line-soft:    #EFEFE9;
+    --ring:         #EAEAE2;
+    --ink:          #1A1A17;
+    --ink-2:        #5C5C54;
+    --ink-3:        #8E8E84;
+    --ink-4:        #C7C7BC;
+    --green-deep:   #1E3A2B;
+    --green:        #3E6B4E;
+    --green-mid:    #6E9A7B;
+    --green-soft:   #C3D6C8;
+    --green-wash:   #EAF1EC;
+    --amber:        #B5822C;
+    --amber-ink:    #7A5A1E;
+    --amber-wash:   #F8EFDC;
+    --amber-flash:  rgba(246,232,201,.95);
+    --violet:       #6F63A0;
+    --violet-wash:  #EDEBF5;
+    --glass:        rgba(255,255,255,.92);
+    --halo-op:      .05;
+    --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:      #101214;
+      --canvas:     #15181A;
+      --surface:    #1A1D1F;
+      --line:       #2C3134;
+      --line-soft:  #23282A;
+      --ring:       #262B2D;
+      --ink:        #E9E9E4;
+      --ink-2:      #A9A9A1;
+      --ink-3:      #7B7B73;
+      --ink-4:      #4E534F;
+      --green-deep: #3F7A54;
+      --green:      #7FB08D;
+      --green-mid:  #5E8A6B;
+      --green-soft: #3A5442;
+      --green-wash: #1D2A22;
+      --amber:      #D9A44E;
+      --amber-ink:  #E4C58C;
+      --amber-wash: #2B2317;
+      --amber-flash: rgba(120,92,40,.85);
+      --violet:     #9B8ED0;
+      --violet-wash: #232036;
+      --glass:      rgba(26,29,31,.92);
+      --halo-op:    .16;
+    }
+  }
+  /* explicit toggle always wins over the OS preference */
+  :root[data-theme="dark"] {
+    --paper:#101214; --canvas:#15181A; --surface:#1A1D1F; --line:#2C3134; --line-soft:#23282A;
+    --ring:#262B2D; --ink:#E9E9E4; --ink-2:#A9A9A1; --ink-3:#7B7B73; --ink-4:#4E534F;
+    --green-deep:#3F7A54; --green:#7FB08D; --green-mid:#5E8A6B; --green-soft:#3A5442; --green-wash:#1D2A22;
+    --amber:#D9A44E; --amber-ink:#E4C58C; --amber-wash:#2B2317; --amber-flash:rgba(120,92,40,.85);
+    --violet:#9B8ED0; --violet-wash:#232036; --glass:rgba(26,29,31,.92); --halo-op:.16;
+  }
+  :root[data-theme="light"] {
+    --paper:#F6F6F2; --canvas:#FAFAF8; --surface:#FFFFFF; --line:#E6E6DF; --line-soft:#EFEFE9;
+    --ring:#EAEAE2; --ink:#1A1A17; --ink-2:#5C5C54; --ink-3:#8E8E84; --ink-4:#C7C7BC;
+    --green-deep:#1E3A2B; --green:#3E6B4E; --green-mid:#6E9A7B; --green-soft:#C3D6C8; --green-wash:#EAF1EC;
+    --amber:#B5822C; --amber-ink:#7A5A1E; --amber-wash:#F8EFDC; --amber-flash:rgba(246,232,201,.95);
+    --violet:#6F63A0; --violet-wash:#EDEBF5; --glass:rgba(255,255,255,.92); --halo-op:.05;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font);
+    background: var(--paper); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------------- stage ----------------
+     The product is designed at a fixed 1600x1000 (16:10) and scaled to fit the
+     window, so it always presents at MacBook proportions and any screenshot of
+     the frame is 16:10 without cropping or padding. Below --stack-at the frame
+     is released and the responsive stacked layout takes over. */
+  .stage {
+    position: fixed; inset: 0;
+    background: var(--paper); overflow: hidden;
+  }
+  .frame {
+    /* absolute centring, because the unscaled box is larger than the viewport
+       and grid/flex centring refuses to overflow it symmetrically */
+    position: absolute; top: 50%; left: 50%;
+    width: 1600px; height: 1000px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    transform-origin: center center;
+    box-shadow: 0 24px 70px -30px rgba(0,0,0,.35);
+    border-radius: 6px; overflow: hidden;
+  }
+
+  /* ---------------- shell ---------------- */
+  .app {
+    display: grid;
+    grid-template-columns: 224px 1fr 372px;
+    grid-template-rows: 64px 1fr;
+    height: 100%;
+    background: var(--surface);
+  }
+
+  /* ---------------- sidebar ---------------- */
+  .rail {
+    grid-row: 1 / 3;
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    padding: 18px 14px; background: var(--surface);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; padding: 2px 6px 22px; }
+  .brand-name { font-size: 16px; font-weight: 600; letter-spacing: .14em; color: var(--ink); }
+  .workspace {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 11px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 18px;
+  }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 11px; border-radius: 8px;
+    font-size: 13px; color: var(--ink-2);
+  }
+  .nav-item.active { background: var(--green-deep); color: #fff; }
+  .nav-item.active svg { stroke: #fff; }
+  .nav-spacer { flex: 1; }
+  .nav svg, .nav-foot svg { width: 15px; height: 15px; stroke: var(--ink-3); fill: none; stroke-width: 1.6; }
+  .nav-foot { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+
+  /* ---------------- topbar ---------------- */
+  .topbar {
+    grid-column: 2 / 4;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 24px; background: var(--surface);
+  }
+  .topbar-brand { display: none; align-items: center; gap: 8px; }
+  .topbar h1 { font-size: 14.5px; font-weight: 600; margin: 0 0 2px; color: var(--ink); }
+  .topbar .sub { font-size: 11.5px; color: var(--ink-3); }
+  .search {
+    flex: 1; max-width: 420px; margin: 0 auto;
+    display: flex; align-items: center; gap: 9px;
+    border: 1px solid var(--line); border-radius: 9px;
+    padding: 9px 12px; color: var(--ink-3); font-size: 12.5px;
+  }
+  .search svg { width: 14px; height: 14px; stroke: var(--ink-3); fill: none; stroke-width: 1.8; }
+  .top-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .theme-btn {
+    border: 1px solid var(--line); background: none; border-radius: 8px;
+    width: 32px; height: 32px; cursor: pointer; color: var(--ink-2);
+    display: grid; place-items: center; padding: 0;
+  }
+  .theme-btn:hover { background: var(--line-soft); }
+  .theme-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: var(--green-deep); color: #fff;
+    display: grid; place-items: center; font-size: 11px; font-weight: 600;
+  }
+
+  /* ---------------- canvas ---------------- */
+  .canvas-wrap {
+    position: relative; display: flex; flex-direction: column;
+    background: var(--canvas); border-right: 1px solid var(--line); overflow: hidden;
+  }
+  .canvas-scroll { flex: 1; min-height: 0; display: flex; }
+  svg#net { width: 100%; height: 100%; display: block; }
+
+  .sector-wedge { fill: var(--green-wash); opacity: .34; }
+  .sector-wedge.empty { fill: rgba(0,0,0,0); stroke: var(--ink-4); stroke-width: 1; stroke-dasharray: 3 5; opacity: 1; }
+  .sector-wedge.empty.flag { stroke: var(--amber); stroke-dasharray: 4 4; }
+  .sector-wedge.alert { animation: alert 1.3s ease-in-out 3; }
+  @keyframes alert {
+    0%, 100% { fill: rgba(0,0,0,0);      stroke-width: 1; }
+    50%      { fill: var(--amber-flash); stroke-width: 2.4; }
+  }
+  .sector-divider { stroke: var(--line); stroke-width: 1; }
+  .ring { fill: none; stroke: var(--ring); stroke-width: 1; }
+
+  .sector-label { font-size: 10px; letter-spacing: .13em; text-transform: uppercase; fill: var(--ink-3); font-weight: 600; }
+  .sector-label.empty { fill: var(--ink-4); }
+  .sector-sub { font-size: 9.5px; fill: var(--ink-4); letter-spacing: .04em; }
+  .sector-sub.flag { fill: var(--amber); }
+  .sector-empty { font-size: 10.5px; fill: var(--ink-4); font-style: italic; letter-spacing: .02em; }
+
+  .link { stroke: var(--green-soft); stroke-width: 1; fill: none; opacity: .55; }
+  .obs { fill: var(--green-mid); opacity: .42; }
+
+  .node-shape { fill: var(--surface); stroke: var(--green); stroke-width: 1.4; }
+  .node-shape.unverified { stroke: var(--green-mid); stroke-dasharray: 3.5 3.5; }
+  .node-shape.center { fill: var(--green-deep); stroke: none; }
+  .node-halo { fill: var(--green-deep); opacity: var(--halo-op); }
+  .node-label { font-size: 10.5px; fill: var(--ink); text-anchor: middle; font-weight: 500; }
+  .node-label.on-dark { fill: #fff; }
+  .node-sub { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; text-anchor: middle; fill: var(--ink-3); }
+  .node-sub.on-dark { fill: rgba(255,255,255,.85); }
+
+  .marker-halo.tension  { fill: var(--amber-wash);  opacity: .55; }
+  .marker-halo.question { fill: var(--violet-wash); opacity: .55; }
+  .marker-glyph { fill: none; stroke-width: 1.4; }
+  .marker-glyph.tension  { stroke: var(--amber); }
+  .marker-glyph.question { stroke: var(--violet); }
+  .marker-label { font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; text-anchor: middle; font-weight: 600; }
+  .marker-label.tension  { fill: var(--amber); }
+  .marker-label.question { fill: var(--violet); }
+  .marker-body { font-size: 9.5px; text-anchor: middle; fill: var(--ink-2); }
+
+  .node { cursor: pointer; }
+  .node .hit { fill: transparent; }
+  .node .focus-ring { fill: none; stroke: var(--green-deep); stroke-width: 2; stroke-dasharray: 3 3; opacity: 0; }
+  .node:focus { outline: none; }
+  .node:focus-visible .focus-ring { opacity: 1; }
+  g.dim { opacity: .2; }
+  .obs.hot { opacity: 1; fill: var(--green); }
+  .obs.pulse { animation: pulse 1.1s ease-in-out 3; }
+  @keyframes pulse { 0%,100% { r: 3; opacity: 1; } 50% { r: 6.5; opacity: .35; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .obs.pulse, .sector-wedge.alert { animation: none; }
+    .obs.pulse { r: 6; }
+  }
+
+  /* legend + controls */
+  .legend {
+    position: absolute; left: 50%; transform: translateX(-50%); bottom: 18px;
+    display: flex; align-items: center; gap: 18px;
+    background: var(--glass);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 18px; font-size: 11px; color: var(--ink-2);
+  }
+  .legend i { display: inline-block; width: 9px; height: 9px; margin-right: 6px; vertical-align: -1px; }
+  .k-signal { border-radius: 50%; background: var(--green-deep); }
+  .k-shared { border-radius: 50%; border: 1.3px solid var(--green); }
+  .k-unver  { border-radius: 50%; border: 1.3px dashed var(--green-mid); }
+  .k-obs    { border-radius: 50%; background: var(--green-mid); opacity: .5; width: 6px; height: 6px; }
+  .k-tens   { background: var(--amber); transform: rotate(45deg); }
+  .k-ques   { background: var(--violet); border-radius: 2px; transform: rotate(45deg); }
+
+  .howto {
+    position: absolute; left: 20px; top: 18px;
+    font-size: 11px; color: var(--ink-3); line-height: 1.65; max-width: 216px;
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: 10px; padding: 11px 13px;
+  }
+  .howto b { color: var(--ink-2); font-weight: 600; }
+
+  .zoom {
+    position: absolute; right: 20px; bottom: 18px;
+    display: flex; align-items: center; gap: 4px;
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 8px; font-size: 11px; color: var(--ink-2);
+  }
+  .zoom button {
+    border: 0; background: none; cursor: pointer; font-size: 14px;
+    color: var(--ink-2); width: 22px; height: 22px; border-radius: 50%; line-height: 1;
+  }
+  .zoom button:hover { background: var(--line-soft); }
+  .zoom span { width: 38px; text-align: center; }
+
+  /* ---------------- detail panel ---------------- */
+  .panel { overflow-y: auto; padding: 22px 24px 40px; background: var(--surface); }
+  .panel::-webkit-scrollbar { width: 8px; }
+  .panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+  .badge {
+    display: inline-block; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase;
+    font-weight: 600; padding: 4px 9px; border-radius: 5px;
+    background: var(--green-wash); color: var(--green-deep);
+  }
+  .badge.tension  { background: var(--amber-wash);  color: var(--amber); }
+  .badge.question { background: var(--violet-wash); color: var(--violet); }
+  .panel h2 { font-size: 19px; line-height: 1.3; margin: 12px 0 6px; font-weight: 600; letter-spacing: -.01em; }
+  .panel .meta { font-size: 11.5px; color: var(--ink-3); margin-bottom: 22px; }
+
+  .sec { margin-bottom: 24px; }
+  .sec > h3 { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin: 0 0 3px; }
+  .sec > .hint { font-size: 11px; color: var(--ink-3); opacity: .8; margin: 0 0 11px; }
+
+  .interp {
+    border-left: 2px solid var(--green-soft); padding: 11px 14px;
+    background: var(--green-wash); border-radius: 0 8px 8px 0;
+    font-size: 13px; line-height: 1.55;
+  }
+
+  .ai-claim { font-size: 12.5px; line-height: 1.6; color: var(--ink); margin: 0 0 9px; }
+  button.ai-claim {
+    display: inline-block; text-align: left; font-family: var(--font);
+    background: none; border: 0; border-bottom: 1px dashed var(--green-mid);
+    padding: 0 0 1px; cursor: pointer;
+  }
+  button.ai-claim:hover { color: var(--green); border-bottom-style: solid; }
+  .ai-cue { font-size: 10.5px; color: var(--green); margin-left: 6px; white-space: nowrap; }
+
+  .quote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .quote { border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; }
+  .quote .who {
+    font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .quote .who::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green-mid); }
+  .quote p { margin: 0; font-size: 12px; line-height: 1.45; font-style: italic; }
+
+  .ev { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .ev p { margin: 0 0 6px; font-size: 12px; line-height: 1.5; font-style: italic; }
+  .ev .src { font-size: 10.5px; color: var(--ink-3); display: flex; gap: 7px; align-items: center; }
+  .ev .src b { font-weight: 600; color: var(--green); }
+  .ev.hot { border-color: var(--green); background: var(--green-wash); }
+
+  button.missing {
+    display: block; width: 100%; text-align: left; font-family: var(--font);
+    border: 1px dashed var(--amber); background: var(--amber-wash);
+    border-radius: 8px; padding: 11px 13px; cursor: pointer;
+  }
+  .missing li { font-size: 12px; line-height: 1.6; color: var(--amber-ink); }
+  .missing ul { margin: 0; padding-left: 16px; }
+  .missing .tap { font-size: 10.5px; color: var(--amber); margin-top: 7px; }
+
+  .qlist { list-style: none; margin: 0; padding: 0; }
+  .qlist li {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+    padding: 7px 0 7px 20px; position: relative; border-bottom: 1px solid var(--line-soft);
+  }
+  .qlist li:last-child { border-bottom: 0; }
+  .qlist li::before { content: '→'; position: absolute; left: 0; color: var(--green-mid); }
+
+  .evo { position: relative; padding-left: 18px; }
+  .evo::before { content: ''; position: absolute; left: 3.5px; top: 6px; bottom: 6px; width: 1px; background: var(--line); }
+  .evo-step { position: relative; margin-bottom: 13px; }
+  .evo-step::before {
+    content: ''; position: absolute; left: -18px; top: 4px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--surface); border: 1.4px solid var(--green-mid);
+  }
+  .evo-step.now::before { background: var(--green-deep); border-color: var(--green-deep); }
+  .evo-step .when { font-size: 10px; color: var(--ink-3); letter-spacing: .04em; }
+  .evo-step .what { font-size: 12px; margin: 2px 0 1px; font-weight: 500; }
+  .evo-step .det { font-size: 11px; color: var(--ink-3); line-height: 1.45; }
+
+  .cta {
+    width: 100%; border: 1px solid var(--green-deep); background: var(--green-deep); color: #fff;
+    border-radius: 8px; padding: 11px; font-size: 12.5px; font-family: var(--font);
+    cursor: pointer; font-weight: 500;
+  }
+  .cta:hover { filter: brightness(1.15); }
+
+  /* ---------------- sensemaking session ---------------- */
+  .session {
+    position: absolute; inset: 0; z-index: 40;
+    background: var(--paper); overflow-y: auto;
+    padding: 40px 24px 80px;
+  }
+  .session[hidden] { display: none; }
+  .session-inner { max-width: 720px; margin: 0 auto; }
+  .back {
+    border: 0; background: none; font-family: var(--font); font-size: 12.5px;
+    color: var(--ink-2); cursor: pointer; padding: 4px 0; margin-bottom: 26px;
+  }
+  .back:hover { color: var(--ink); }
+  .session .eyebrow {
+    font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600;
+  }
+  .session h2 { font-size: 25px; font-weight: 600; margin: 9px 0 6px; letter-spacing: -.015em; }
+  .session .lede { font-size: 13px; color: var(--ink-3); margin: 0 0 36px; }
+
+  .ssec { margin-bottom: 34px; }
+  .ssec > h3 { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin: 0 0 3px; }
+  .ssec > .hint { font-size: 12px; color: var(--ink-3); opacity: .85; margin: 0 0 14px; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .card-tag {
+    display: block; text-align: right; font-size: 9px; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--green); font-weight: 600; margin-bottom: 10px;
+  }
+  .card-prompt { font-size: 12.5px; color: var(--ink-2); font-style: italic; margin: 0 0 12px; line-height: 1.55; }
+
+  .field {
+    width: 100%; font-family: var(--font); font-size: 13px; color: var(--ink);
+    background: var(--canvas); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 13px; line-height: 1.55;
+  }
+  .field::placeholder { color: var(--ink-3); opacity: .75; }
+  .field:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
+  textarea.field { min-height: 104px; resize: vertical; }
+
+  .exp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .add {
+    width: 100%; margin-top: 12px;
+    border: 1px solid var(--green-deep); background: var(--green-deep);
+    color: #fff; border-radius: 8px; padding: 11px; font-size: 12.5px;
+    font-family: var(--font); cursor: pointer; font-weight: 500;
+  }
+  .add:hover { filter: brightness(1.1); }
+  .exp-list { list-style: none; margin: 0 0 12px; padding: 0; }
+  .exp-list li {
+    border: 1px solid var(--line); border-left: 2px solid var(--green);
+    border-radius: 0 8px 8px 0; padding: 11px 13px; margin-bottom: 8px; background: var(--surface);
+  }
+  .exp-list .exp-what { font-size: 12.5px; line-height: 1.5; margin-bottom: 5px; }
+  .exp-list .exp-meta { font-size: 10.5px; color: var(--ink-3); }
+  .exp-empty { font-size: 12px; color: var(--ink-3); font-style: italic; margin-bottom: 12px; }
+
+  .prompts { list-style: none; margin: 0; padding: 0; }
+  .prompts li {
+    font-size: 13px; line-height: 1.55; color: var(--ink-2);
+    padding: 11px 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .prompts li:last-child { border-bottom: 0; }
+
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+  /* ---------------- responsive ---------------- */
+  /* Above this width the frame stays a fixed 1600x1000 and simply scales, so
+     there are no intermediate desktop layouts. Below it the frame is released
+     and the stacked layout takes over, since scaling a 1600px design into a
+     small window makes the type unreadable. */
+  @media (max-width: 1200px) {
+    .stage {
+      position: static; display: block;
+      overflow: visible; background: var(--surface);
+    }
+    .frame {
+      position: static; top: auto; left: auto;
+      width: 100%; height: auto;
+      transform: none; box-shadow: none; border-radius: 0; overflow: visible;
+    }
+    .session { position: fixed; }
+    .search { display: none; }
+
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      height: auto; min-height: 100vh;
+    }
+    .rail { display: none; }
+    .topbar { grid-column: 1; position: sticky; top: 0; z-index: 20; padding: 12px 18px; height: auto; }
+    .topbar-brand { display: flex; }
+
+    .canvas-wrap { border-right: 0; border-bottom: 1px solid var(--line); }
+    /* the diagram keeps its readable size and scrolls in its own container */
+    .canvas-scroll { overflow-x: auto; overflow-y: hidden; }
+    svg#net { width: 900px; height: 700px; flex: none; }
+
+    .howto {
+      position: static; max-width: none; background: none; border: 0;
+      border-bottom: 1px solid var(--line-soft); border-radius: 0;
+      padding: 14px 18px;
+    }
+    .legend {
+      position: static; transform: none; margin: 0 auto 14px;
+      flex-wrap: wrap; justify-content: center; gap: 10px 16px;
+      max-width: calc(100% - 32px); border-radius: 12px;
+    }
+    .zoom { display: none; }
+    .panel { overflow-y: visible; }
+  }
+
+  @media (max-width: 620px) {
+    .topbar { flex-wrap: wrap; gap: 10px 14px; }
+    .panel { padding: 20px 18px 40px; }
+    .quote-grid, .exp-row { grid-template-columns: 1fr; }
+    .session { padding: 28px 18px 60px; }
+    .session h2 { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="frame" id="frame">
+<div class="app">
+
+  <!-- ============ sidebar ============ -->
+  <aside class="rail">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="5"  cy="6"   r="2.3" fill="#3E6B4E"/>
+        <circle cx="14" cy="4.5" r="1.7" fill="#6E9A7B"/>
+        <circle cx="15" cy="13"  r="2.6" fill="#1E3A2B"/>
+        <circle cx="6"  cy="15"  r="1.9" fill="#6E9A7B"/>
+      </svg>
+      <span class="brand-name">LOOM</span>
+    </div>
+
+    <div class="workspace">
+      <span>Org Resilience Study</span>
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5l3 3 3-3"/></svg>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <div class="nav-item active" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8l7-5 7 5v8a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1z"/></svg>Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 2L4 11h5l-1 7 7-9h-5z"/></svg>Signals</div>
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.4"/></svg>Perspectives</div>
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8l-4 3z"/></svg>Sessions</div>
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3v14M8 3v14M12.5 3.6l3.6 13.2"/></svg>Library</div>
+    </nav>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-foot nav">
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4"/></svg>Search</div>
+      <div class="nav-item"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7"/></svg>Settings</div>
+    </div>
+  </aside>
+
+  <!-- ============ topbar ============ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="5" cy="6" r="2.3" fill="#3E6B4E"/><circle cx="14" cy="4.5" r="1.7" fill="#6E9A7B"/>
+        <circle cx="15" cy="13" r="2.6" fill="#1E3A2B"/><circle cx="6" cy="15" r="1.9" fill="#6E9A7B"/>
+      </svg>
+      <span class="brand-name" style="font-size:14px">LOOM</span>
+    </div>
+    <div>
+      <h1>Knowledge Network</h1>
+      <div class="sub"><span id="sigCount">10</span> signals &middot; <span id="obsCount">109</span> observations &middot; 4 of 6 perspectives represented</div>
+    </div>
+    <div class="search" aria-hidden="true">
+      <svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4"/></svg>
+      Search signals, observations or people…
+    </div>
+    <div class="top-actions">
+      <button class="theme-btn" id="themeBtn" aria-label="Switch to dark theme">
+        <svg viewBox="0 0 20 20" id="themeIcon" aria-hidden="true"><path d="M16 11.2A6.5 6.5 0 0 1 8.8 4a6.5 6.5 0 1 0 7.2 7.2z"/></svg>
+      </button>
+      <div class="avatar" aria-hidden="true">AO</div>
+    </div>
+  </header>
+
+  <!-- ============ canvas ============ -->
+  <main class="canvas-wrap">
+    <div class="howto">
+      <b>How to read this</b><br>
+      Direction shows <b>whose perspective</b> a signal comes from.<br>
+      Distance from the centre shows <b>how many groups</b> share it.<br>
+      Size shows <b>how much evidence</b> supports it.
+    </div>
+
+    <div class="canvas-scroll">
+      <svg id="net" viewBox="0 0 960 820" preserveAspectRatio="xMidYMid meet"
+           role="group" aria-label="Knowledge network. Signals arranged by perspective; use Tab to move between them.">
+        <g id="zoomLayer">
+          <g id="gSectors"></g>
+          <g id="gRings"></g>
+          <g id="gLinks"></g>
+          <g id="gObs"></g>
+          <g id="gNodes"></g>
+          <g id="gSectorLabels"></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="k-signal"></i>Shared signal</span>
+      <span><i class="k-shared"></i>Corroborated</span>
+      <span><i class="k-unver"></i>Unverified</span>
+      <span><i class="k-obs"></i>Observation</span>
+      <span><i class="k-tens"></i>Tension</span>
+      <span><i class="k-ques"></i>Question</span>
+    </div>
+
+    <div class="zoom">
+      <button id="zOut" aria-label="Zoom out">−</button>
+      <span id="zVal">100%</span>
+      <button id="zIn" aria-label="Zoom in">+</button>
+    </div>
+  </main>
+
+  <!-- ============ detail panel ============ -->
+  <aside class="panel" id="panel" role="region" aria-label="Selected item detail" aria-live="polite" tabindex="-1"></aside>
+</div>
+
+<!-- ============ sensemaking session ============ -->
+<section class="session" id="session" hidden role="dialog" aria-modal="true" aria-labelledby="sessTitle">
+  <div class="session-inner">
+    <button class="back" id="sessBack">← Back</button>
+    <div class="eyebrow">Sensemaking session</div>
+    <h2 id="sessTitle"></h2>
+    <p class="lede" id="sessLede"></p>
+
+    <div class="ssec">
+      <h3>Shared interpretation</h3>
+      <p class="hint">Your team's collective understanding</p>
+      <div class="card">
+        <span class="card-tag">Team insight</span>
+        <p class="card-prompt">Use this space to formulate your team's interpretation. What does this signal mean?</p>
+        <label class="sr-only" for="interpBox">Your team's interpretation</label>
+        <textarea class="field" id="interpBox"
+          placeholder="Example: Priorities appear clear at a strategic level but become less clear as work moves into execution…"></textarea>
+      </div>
+    </div>
+
+    <div class="ssec">
+      <h3>Potential experiments</h3>
+      <p class="hint">What might you try to explore this further?</p>
+      <p class="card-prompt" style="margin-bottom:14px">
+        Capture experiments to test your interpretation. Not actions or recommendations — small tests to learn more.
+      </p>
+      <ul class="exp-list" id="expList"></ul>
+      <p class="exp-empty" id="expEmpty">No experiments captured yet.</p>
+      <label class="sr-only" for="expWhat">Experiment description</label>
+      <input class="field" id="expWhat" placeholder="Experiment description (e.g. run a joint prioritization review between Product and Engineering)">
+      <div class="exp-row">
+        <label class="sr-only" for="expWho">Owner</label>
+        <input class="field" id="expWho" placeholder="Owner">
+        <label class="sr-only" for="expWhen">Duration</label>
+        <input class="field" id="expWhen" placeholder="Duration (e.g. 2 weeks)">
+      </div>
+      <button class="add" id="expAdd">Add experiment</button>
+      <p class="sr-only" id="expStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="ssec">
+      <h3>Discussion prompts</h3>
+      <p class="hint">Questions to explore together</p>
+      <ul class="prompts" id="sessPrompts"></ul>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<script>
+/* ============================================================
+   LOOM — synthesis prototype
+   Encoding:
+     angle  = perspective(s) a signal is described from
+     radius = inverse of perspective breadth (shared -> centre)
+     size   = volume of supporting observations
+     stroke = solid when corroborated, dashed when unverified
+   ============================================================ */
+
+const CX = 480, CY = 400, R_OUT = 348;
+
+const PERSPECTIVES = {
+  leadership:  { label: 'Leadership',  angle: -90, present: true  },
+  engineering: { label: 'Engineering', angle: -30, present: true  },
+  product:     { label: 'Product',     angle:  30, present: true  },
+  design:      { label: 'Design',      angle:  90, present: true  },
+  sales:       { label: 'Sales',       angle: 150, present: false, note: 'limited input' },
+  customer:    { label: 'Customer',    angle: 210, present: false, note: 'no viewpoints represented' },
+};
+
+const SIGNALS = [
+  {
+    id: 'roadmap', label: 'Roadmap Misalignment', type: 'signal',
+    persp: ['leadership','engineering','product','design'], obs: 43, verified: true,
+    status: 'Active signal', updated: 'updated 2 days ago',
+    interpretation: 'Strategic clarity may not translate into execution clarity.',
+    ai: [
+      { text: 'Three independent observations describe the same emerging organizational pattern.', evidenced: true },
+      { text: 'Engineering and Product describe similar behaviour using different language.', evidenced: false },
+      { text: 'You may want to compare these perspectives.', evidenced: false },
+    ],
+    quotes: [
+      { p: 'leadership',  t: 'We have a clear strategic direction.' },
+      { p: 'engineering', t: 'We struggle to plan ahead.' },
+      { p: 'product',     t: 'Priorities shift frequently.' },
+      { p: 'design',      t: 'Requirements change late.' },
+    ],
+    evidence: [
+      { t: 'Priorities changed during the sprint.',             src: 'Engineering', when: 'retrospective · 3 days ago' },
+      { t: 'We received conflicting stakeholder requests.',     src: 'Product',     when: 'planning meeting · 1 week ago' },
+      { t: "I'm not sure this initiative is still a priority.", src: 'Design',      when: 'Slack discussion · 2 weeks ago' },
+    ],
+    missing: ['No customer-facing viewpoints represented', 'Limited input from Sales'],
+    questions: [
+      'Why might teams experience this signal differently?',
+      'What would it take for all teams to describe the roadmap in similar terms?',
+      'Are we solving the same problem, or different problems with the same name?',
+      'Which perspectives are underrepresented in our current understanding?',
+    ],
+    evolution: [
+      { when: '8 weeks ago', what: 'First appeared in planning meetings',   det: 'Isolated mentions of priority uncertainty during quarterly planning' },
+      { when: '4 weeks ago', what: 'Appeared in engineering retrospectives', det: 'Engineering teams began describing similar misalignment' },
+      { when: 'This week',   what: 'Spreading to stakeholder discussions',   det: 'Now appearing across leadership, product, engineering and design', now: true },
+    ],
+  },
+  {
+    id: 'trust', label: 'Distributed Trust Collapse', type: 'signal',
+    persp: ['leadership','engineering'], obs: 18, verified: true,
+    status: 'Active signal', updated: 'updated 5 days ago',
+    interpretation: 'Confidence in cross-team commitments may be eroding faster than it is being repaired.',
+    ai: [
+      { text: 'Two groups report the same breakdown using different vocabulary.', evidenced: true },
+      { text: 'This pattern often precedes missed deadlines and team frustration.', evidenced: false },
+    ],
+    quotes: [
+      { p: 'leadership',  t: 'Teams have the autonomy they asked for.' },
+      { p: 'engineering', t: 'We are not sure who actually decides.' },
+    ],
+    evidence: [
+      { t: 'Decisions get revisited after we have already committed.', src: 'Engineering', when: 'retrospective · 6 days ago' },
+      { t: 'We escalate more than we used to.',                        src: 'Leadership',  when: 'staff meeting · 2 weeks ago' },
+    ],
+    missing: ['No customer-facing viewpoints represented'],
+    questions: ['Where does shared understanding appear to break down?', 'Which assumptions are we making?'],
+    evolution: [
+      { when: '6 weeks ago', what: 'Surfaced in one-to-ones',      det: 'Individual mentions of unclear decision ownership' },
+      { when: 'This week',   what: 'Now visible across two groups', det: 'Leadership and engineering describe the same breakdown', now: true },
+    ],
+  },
+  {
+    id: 'bottlenecks', label: 'Decision Bottlenecks', type: 'signal',
+    persp: ['engineering','product'], obs: 12, verified: true,
+    status: 'Active signal', updated: 'updated 1 week ago',
+    interpretation: 'Approval load may be concentrating in a small number of people.',
+    ai: [{ text: 'Observations cluster around a small set of recurring approvers.', evidenced: true }],
+    quotes: [
+      { p: 'engineering', t: 'We wait on sign-off more than we build.' },
+      { p: 'product',     t: 'Everything routes through the same review.' },
+    ],
+    evidence: [{ t: 'Three features waited on the same approval this month.', src: 'Product', when: 'planning meeting · 8 days ago' }],
+    missing: ['Limited input from Sales'],
+    questions: ['What evidence challenges our interpretation?'],
+    evolution: [{ when: '3 weeks ago', what: 'Emerged in delivery reviews', det: 'Repeated mentions of approval delays', now: true }],
+  },
+  {
+    id: 'knowledge', label: 'Cross-Team Knowledge Sharing', type: 'signal',
+    persp: ['product','design'], obs: 9, verified: true,
+    status: 'Emerging signal', updated: 'updated 4 days ago',
+    interpretation: 'Informal mentorship appears increasingly important to team velocity.',
+    ai: [{ text: 'New observations are emerging faster than they are being resolved.', evidenced: false }],
+    quotes: [
+      { p: 'product', t: 'The context lives in people, not documents.' },
+      { p: 'design',  t: 'I ask someone rather than search.' },
+    ],
+    evidence: [{ t: 'Onboarding depends on who happens to be available.', src: 'Design', when: 'interview · 4 days ago' }],
+    missing: ['No customer-facing viewpoints represented'],
+    questions: ['What perspectives are currently missing?'],
+    evolution: [{ when: '2 weeks ago', what: 'Raised in design critique', det: 'Mentions of undocumented context', now: true }],
+  },
+  {
+    id: 'clarity', label: 'Strategic Clarity Assumed', type: 'signal',
+    persp: ['leadership'], obs: 4, verified: false,
+    status: 'Unverified · single perspective', updated: 'updated 1 week ago',
+    interpretation: 'Leadership may be reading alignment where teams experience ambiguity.',
+    ai: [{ text: 'This reading rests on one perspective only.', evidenced: false }],
+    quotes: [{ p: 'leadership', t: 'The strategy has not changed all year.' }],
+    evidence: [{ t: 'We communicated the direction in January.', src: 'Leadership', when: 'staff meeting · 9 days ago' }],
+    missing: ['No engineering perspective on this signal', 'No customer-facing viewpoints represented'],
+    questions: ['Which observations remain unverified?'],
+    evolution: [{ when: '1 week ago', what: 'Single-source observation', det: 'Not yet corroborated by other groups', now: true }],
+  },
+  {
+    id: 'planning', label: 'Planning Horizon Shrinking', type: 'signal',
+    persp: ['engineering'], obs: 7, verified: true,
+    status: 'Active signal', updated: 'updated 3 days ago',
+    interpretation: 'Teams may be planning defensively in response to change.',
+    ai: [{ text: 'Mentions of shortened planning windows are increasing.', evidenced: false }],
+    quotes: [{ p: 'engineering', t: 'We only plan two weeks out now.' }],
+    evidence: [{ t: 'Quarterly planning stopped being useful.', src: 'Engineering', when: 'retrospective · 3 days ago' }],
+    missing: ['No product perspective recorded'],
+    questions: ['What changed during the last quarter?'],
+    evolution: [{ when: '5 weeks ago', what: 'Noticed in sprint reviews', det: 'Shorter commitments each cycle', now: true }],
+  },
+  {
+    id: 'informal', label: 'Informal Channels Increasing', type: 'signal',
+    persp: ['engineering'], obs: 3, verified: false,
+    status: 'Unverified · single perspective', updated: 'updated 2 weeks ago',
+    interpretation: 'Work may be moving into channels the organization cannot see.',
+    ai: [{ text: 'Few observations so far; treat as tentative.', evidenced: false }],
+    quotes: [{ p: 'engineering', t: 'Real decisions happen in DMs.' }],
+    evidence: [{ t: 'The thread that mattered was a private one.', src: 'Engineering', when: 'Slack discussion · 2 weeks ago' }],
+    missing: ['No leadership perspective on this signal'],
+    questions: ['Which observations remain unverified?'],
+    evolution: [{ when: '2 weeks ago', what: 'First mention', det: 'Single unverified observation', now: true }],
+  },
+  {
+    id: 'churn', label: 'Priority Churn', type: 'signal',
+    persp: ['product'], obs: 6, verified: true,
+    status: 'Active signal', updated: 'updated 6 days ago',
+    interpretation: 'Reprioritisation may be happening faster than teams can absorb.',
+    ai: [{ text: 'Observations recur on a roughly two-week cycle.', evidenced: false }],
+    quotes: [{ p: 'product', t: 'Priorities shift frequently.' }],
+    evidence: [{ t: 'We reordered the backlog three times this month.', src: 'Product', when: 'planning meeting · 6 days ago' }],
+    missing: ['No customer-facing viewpoints represented'],
+    questions: ['Are we solving the same problem, or different problems?'],
+    evolution: [{ when: '4 weeks ago', what: 'Recurring in backlog reviews', det: 'Repeated reordering', now: true }],
+  },
+  {
+    id: 'late', label: 'Requirements Arrive Late', type: 'signal',
+    persp: ['design'], obs: 5, verified: true,
+    status: 'Active signal', updated: 'updated 1 week ago',
+    interpretation: 'Design may be absorbing upstream uncertainty at the end of the process.',
+    ai: [{ text: 'Observations concentrate at the end of delivery cycles.', evidenced: false }],
+    quotes: [{ p: 'design', t: 'Requirements change late.' }],
+    evidence: [{ t: 'Scope arrived after the design was signed off.', src: 'Design', when: 'critique · 8 days ago' }],
+    missing: ['Limited input from Sales'],
+    questions: ['Where does shared understanding break down?'],
+    evolution: [{ when: '3 weeks ago', what: 'Raised in critique', det: 'Late scope changes', now: true }],
+  },
+  {
+    id: 'docs', label: 'Documentation Avoided', type: 'signal',
+    persp: ['design'], obs: 2, verified: false,
+    status: 'Unverified · single perspective', updated: 'updated 3 weeks ago',
+    interpretation: 'Documentation may be skipped when direction feels unstable.',
+    ai: [{ text: 'Two observations only; not yet a pattern.', evidenced: false }],
+    quotes: [{ p: 'design', t: 'Why document something that will change?' }],
+    evidence: [{ t: 'We stopped updating the spec.', src: 'Design', when: 'Slack discussion · 3 weeks ago' }],
+    missing: ['No engineering perspective on this signal'],
+    questions: ['Which observations remain unverified?'],
+    evolution: [{ when: '3 weeks ago', what: 'First mention', det: 'Not yet corroborated', now: true }],
+  },
+];
+
+const MARKERS = [
+  {
+    id: 'tension1', type: 'tension', label: 'Tension',
+    body: 'Different teams interpret the same issues differently.',
+    angle: -60, radius: 268, obs: 0,
+    title: 'Leadership and Engineering describe the same roadmap differently',
+    status: 'Held tension · not resolved', updated: 'surfaced 5 days ago',
+    interpretation: 'This difference is being kept visible rather than reconciled, because both readings appear valid from where each group sits.',
+    ai: [{ text: 'Both descriptions are internally consistent. The disagreement is about definition, not fact.', evidenced: false }],
+    quotes: [
+      { p: 'leadership',  t: 'We have a clear strategic direction.' },
+      { p: 'engineering', t: 'We struggle to plan ahead.' },
+    ],
+    evidence: [],
+    missing: ['No customer-facing viewpoints represented'],
+    questions: ['What would it take for both groups to describe this the same way?', 'Is the difference a problem, or useful information?'],
+  },
+  {
+    id: 'question1', type: 'question', label: 'Question',
+    body: 'What changed in the last quarter that amplified this pattern?',
+    angle: 8, radius: 322, obs: 0,
+    title: 'What changed in the last quarter that amplified this pattern?',
+    status: 'Open question · 3 people following', updated: 'asked 4 days ago',
+    interpretation: 'Raised during a sensemaking session. Deliberately left open.',
+    ai: [{ text: 'No observation in the workspace currently answers this.', evidenced: false }],
+    quotes: [], evidence: [],
+    missing: ['No customer-facing viewpoints represented', 'Limited input from Sales'],
+    questions: ['Which evidence would help us answer this?', 'Who would know?'],
+  },
+];
+
+/* ---------- geometry ---------- */
+const rad = d => (d * Math.PI) / 180;
+const pt  = (a, r) => [CX + r * Math.cos(rad(a)), CY + r * Math.sin(rad(a))];
+
+function meanAngle(keys) {
+  let x = 0, y = 0;
+  keys.forEach(k => { const a = rad(PERSPECTIVES[k].angle); x += Math.cos(a); y += Math.sin(a); });
+  return (Math.atan2(y / keys.length, x / keys.length) * 180) / Math.PI;
+}
+function radiusFor(n) {
+  if (n >= 4) return 0;
+  if (n === 3) return 118;
+  if (n === 2) return 186;
+  return 266;
+}
+const sizeFor = obs => 30 + Math.sqrt(obs) * 4.4;
+
+function rng(seed) {
+  let s = 0; for (let i = 0; i < seed.length; i++) s = (s * 31 + seed.charCodeAt(i)) >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (n, attrs = {}) => {
+  const e = document.createElementNS(NS, n);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+};
+
+function wrap(text, maxChars) {
+  const words = text.split(' ');
+  const lines = []; let cur = '';
+  words.forEach(w => {
+    if ((cur + ' ' + w).trim().length <= maxChars) cur = (cur + ' ' + w).trim();
+    else { if (cur) lines.push(cur); cur = w; }
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+/* ---------- sectors ---------- */
+const gSectors = document.getElementById('gSectors');
+const gSectorLabels = document.getElementById('gSectorLabels');
+const sectorEls = {};
+
+Object.entries(PERSPECTIVES).forEach(([key, p]) => {
+  const a0 = p.angle - 30, a1 = p.angle + 30;
+  const [x0, y0] = pt(a0, R_OUT), [x1, y1] = pt(a1, R_OUT);
+  const w = el('path', {
+    d: `M ${CX} ${CY} L ${x0} ${y0} A ${R_OUT} ${R_OUT} 0 0 1 ${x1} ${y1} Z`,
+    class: 'sector-wedge' + (p.present ? '' : ' empty flag'),
+  });
+  gSectors.appendChild(w);
+  sectorEls[key] = w;
+
+  gSectors.appendChild(el('line', { x1: CX, y1: CY, x2: x0, y2: y0, class: 'sector-divider' }));
+
+  const [lx, ly] = pt(p.angle, R_OUT + 26);
+  const t = el('text', { x: lx, y: ly, class: 'sector-label' + (p.present ? '' : ' empty'), 'text-anchor': 'middle' });
+  t.textContent = p.label.toUpperCase();
+  gSectorLabels.appendChild(t);
+
+  if (!p.present) {
+    const s = el('text', { x: lx, y: ly + 13, class: 'sector-sub flag', 'text-anchor': 'middle' });
+    s.textContent = p.note;
+    gSectorLabels.appendChild(s);
+
+    // the gap in the data is a gap in the picture
+    const [ex, ey] = pt(p.angle, 208);
+    ['no observations', 'recorded'].forEach((line, i) => {
+      const e = el('text', { x: ex, y: ey + i * 13, class: 'sector-empty', 'text-anchor': 'middle' });
+      e.textContent = line;
+      gSectorLabels.appendChild(e);
+    });
+  }
+});
+
+const gRings = document.getElementById('gRings');
+[118, 186, 266].forEach(r => gRings.appendChild(el('circle', { cx: CX, cy: CY, r, class: 'ring' })));
+
+/* ---------- observations ---------- */
+const gObs = document.getElementById('gObs');
+const obsBySignal = {};
+
+SIGNALS.forEach(s => {
+  const r = rng(s.id);
+  const dots = [];
+  const n = Math.min(s.obs, 10);
+  for (let i = 0; i < n; i++) {
+    const pk = s.persp[i % s.persp.length];
+    const a = PERSPECTIVES[pk].angle + (r() - 0.5) * 46;
+    const rr = 132 + r() * 196;
+    const [x, y] = pt(a, rr);
+    const c = el('circle', { cx: x, cy: y, r: 3, class: 'obs' });
+    gObs.appendChild(c);
+    dots.push({ el: c, p: pk });
+  }
+  obsBySignal[s.id] = dots;
+});
+
+/* ---------- links + nodes ---------- */
+const gLinks = document.getElementById('gLinks');
+const gNodes = document.getElementById('gNodes');
+const nodeEls = {};
+const linkEls = {};
+
+/* Signals sharing the same perspectives land on the same spot — fan them out. */
+const buckets = {};
+SIGNALS.forEach(s => {
+  s._ang = meanAngle(s.persp);
+  s._rad = radiusFor(s.persp.length);
+  const k = s._ang.toFixed(1) + '|' + s._rad;
+  (buckets[k] = buckets[k] || []).push(s);
+});
+Object.values(buckets).forEach(group => {
+  if (group.length < 2) return;
+  group.forEach((s, i) => {
+    s._ang += (i - (group.length - 1) / 2) * 21;
+    s._rad += (i % 2 ? 1 : -1) * 26;
+  });
+});
+
+function describe(s) {
+  const n = s.persp.length;
+  return `${s.label}. ${n} of 6 perspectives. ${s.obs} observations. `
+       + (s.verified ? 'Corroborated.' : 'Unverified.');
+}
+
+SIGNALS.forEach(s => {
+  const [x, y] = pt(s._ang, s._rad);
+  const size = sizeFor(s.obs);
+  s._x = x; s._y = y; s._r = size;
+
+  linkEls[s.id] = s.persp.map(pk => {
+    const [px, py] = pt(PERSPECTIVES[pk].angle, R_OUT - 34);
+    const l = el('line', { x1: x, y1: y, x2: px, y2: py, class: 'link' });
+    gLinks.appendChild(l);
+    return l;
+  });
+
+  const g = el('g', { class: 'node', tabindex: '0', role: 'button', 'aria-label': describe(s) });
+  const isCenter = s.persp.length >= 4;
+
+  if (isCenter) [size + 40, size + 22].forEach(hr =>
+    g.appendChild(el('circle', { cx: x, cy: y, r: hr, class: 'node-halo' })));
+
+  g.appendChild(el('circle', {
+    cx: x, cy: y, r: size,
+    class: 'node-shape' + (isCenter ? ' center' : '') + (s.verified ? '' : ' unverified'),
+  }));
+
+  const fs = isCenter ? 12.5 : 10.5;
+  const lines = wrap(s.label, Math.max(9, Math.floor((size * 2 - 10) / (fs * 0.56))));
+  const startY = y - ((lines.length - 1) * fs * 0.62) - (isCenter ? 2 : 4);
+  lines.forEach((ln, i) => {
+    const t = el('text', {
+      x, y: startY + i * fs * 1.24,
+      class: 'node-label' + (isCenter ? ' on-dark' : ''),
+      'font-size': fs, 'dominant-baseline': 'middle',
+    });
+    t.textContent = ln;
+    g.appendChild(t);
+  });
+
+  const sub = el('text', {
+    x, y: startY + lines.length * fs * 1.24 + (isCenter ? 1 : 2),
+    class: 'node-sub' + (isCenter ? ' on-dark' : ''),
+    'dominant-baseline': 'middle', 'font-size': isCenter ? 7.5 : 8,
+  });
+  sub.textContent = s.obs + (isCenter ? ' OBSERVATIONS' : '');
+  g.appendChild(sub);
+
+  g.appendChild(el('circle', { cx: x, cy: y, r: size + 7, class: 'focus-ring' }));
+  g.appendChild(el('circle', { cx: x, cy: y, r: size + 6, class: 'hit' }));
+
+  wireNode(g, s.id);
+  gNodes.appendChild(g);
+  nodeEls[s.id] = g;
+});
+
+MARKERS.forEach(m => {
+  const [x, y] = pt(m.angle, m.radius);
+  const g = el('g', { class: 'node', tabindex: '0', role: 'button', 'aria-label': `${m.label}. ${m.body}` });
+
+  g.appendChild(el('circle', { cx: x, cy: y, r: 46, class: 'marker-halo ' + m.type }));
+  const s = 9;
+  g.appendChild(el('path', {
+    d: `M ${x} ${y - 30 - s} L ${x + s} ${y - 30} L ${x} ${y - 30 + s} L ${x - s} ${y - 30} Z`,
+    class: 'marker-glyph ' + m.type,
+  }));
+
+  const lab = el('text', { x, y: y - 12, class: 'marker-label ' + m.type });
+  lab.textContent = m.label.toUpperCase();
+  g.appendChild(lab);
+
+  wrap(m.body, 22).forEach((ln, i) => {
+    const t = el('text', { x, y: y + 2 + i * 12, class: 'marker-body' });
+    t.textContent = ln;
+    g.appendChild(t);
+  });
+
+  g.appendChild(el('circle', { cx: x, cy: y, r: 50, class: 'focus-ring' }));
+  g.appendChild(el('circle', { cx: x, cy: y, r: 48, class: 'hit' }));
+
+  wireNode(g, m.id);
+  gNodes.appendChild(g);
+  nodeEls[m.id] = g;
+});
+
+function wireNode(g, id) {
+  g.addEventListener('mouseenter', () => highlight(id));
+  g.addEventListener('mouseleave', () => highlight(null));
+  g.addEventListener('focus', () => highlight(id));
+  g.addEventListener('blur',  () => highlight(null));
+  g.addEventListener('click', () => select(id));
+  g.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      select(id);
+    }
+  });
+}
+
+/* ---------- interaction ---------- */
+const ALL = [...SIGNALS, ...MARKERS];
+const byId = id => ALL.find(s => s.id === id);
+
+function highlight(id) {
+  Object.entries(nodeEls).forEach(([k, g]) => g.classList.toggle('dim', !!id && k !== id));
+  Object.values(obsBySignal).flat().forEach(d => d.el.classList.remove('hot'));
+  Object.values(linkEls).flat().forEach(l => (l.style.opacity = id ? .12 : ''));
+  if (id) {
+    (obsBySignal[id] || []).forEach(d => d.el.classList.add('hot'));
+    (linkEls[id] || []).forEach(l => { l.style.opacity = .95; l.style.stroke = 'var(--green)'; });
+  } else {
+    Object.values(linkEls).flat().forEach(l => (l.style.stroke = ''));
+  }
+}
+
+const KEY_BY_LABEL = Object.fromEntries(
+  Object.entries(PERSPECTIVES).map(([k, p]) => [p.label, k]));
+
+/* AI shows its work: light the exact observations a claim rests on, one per source group */
+function proveClaim(id) {
+  const s = byId(id);
+  const pool = obsBySignal[id] || [];
+  const picked = [];
+  (s.evidence || []).forEach(e => {
+    const pk = KEY_BY_LABEL[e.src];
+    const d = pool.find(o => o.p === pk && !picked.includes(o));
+    if (d) picked.push(d);
+  });
+  while (picked.length < 3) {
+    const d = pool.find(o => !picked.includes(o));
+    if (!d) break;
+    picked.push(d);
+  }
+  picked.forEach(d => d.el.classList.remove('pulse'));
+  requestAnimationFrame(() =>
+    picked.forEach(d => { d.el.classList.add('hot', 'pulse'); }));
+  document.querySelectorAll('.ev').forEach(e => e.classList.add('hot'));
+  setTimeout(() => {
+    document.querySelectorAll('.ev').forEach(e => e.classList.remove('hot'));
+    picked.forEach(d => d.el.classList.remove('pulse', 'hot'));
+  }, 3600);
+}
+
+function flagMissing() {
+  Object.entries(PERSPECTIVES).forEach(([k, p]) => {
+    if (p.present) return;
+    const w = sectorEls[k];
+    w.classList.remove('alert');
+    requestAnimationFrame(() => w.classList.add('alert'));
+  });
+}
+
+let currentId = 'roadmap';
+
+function select(id) {
+  const s = byId(id);
+  if (!s) return;
+  currentId = id;
+  renderPanel(s);
+  highlight(id);
+  setTimeout(() => highlight(null), 1400);
+}
+
+function renderPanel(s) {
+  const badgeClass = s.type === 'tension' ? 'tension' : s.type === 'question' ? 'question' : '';
+  const badgeText  = s.type === 'tension' ? 'Tension' : s.type === 'question' ? 'Open question' : 'Signal';
+
+  let h = `
+    <span class="badge ${badgeClass}">${badgeText}</span>
+    <h2>${s.title || s.label}</h2>
+    <div class="meta">${s.status} &middot; ${s.updated}</div>`;
+
+  if (s.interpretation) h += `
+    <div class="sec">
+      <h3>One possible interpretation</h3>
+      <p class="hint">Offered for discussion, not as a conclusion</p>
+      <div class="interp">${s.interpretation}</div>
+    </div>`;
+
+  if (s.ai && s.ai.length) h += `
+    <div class="sec">
+      <h3>AI insights</h3>
+      <p class="hint">Every claim links back to the observations behind it</p>
+      ${s.ai.map(a => a.evidenced
+        ? `<button type="button" class="ai-claim" data-prove="1">${a.text}<span class="ai-cue">show me →</span></button>`
+        : `<p class="ai-claim">${a.text}</p>`).join('')}
+    </div>`;
+
+  if (s.quotes && s.quotes.length) h += `
+    <div class="sec">
+      <h3>How different groups describe this</h3>
+      <p class="hint">${s.quotes.length} of 6 perspectives recorded</p>
+      <div class="quote-grid">
+        ${s.quotes.map(q => `
+          <div class="quote">
+            <div class="who">${PERSPECTIVES[q.p].label}</div>
+            <p>&ldquo;${q.t}&rdquo;</p>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  if (s.evidence && s.evidence.length) h += `
+    <div class="sec">
+      <h3>Supporting evidence</h3>
+      <p class="hint">What people actually said, and where</p>
+      ${s.evidence.map(e => `
+        <div class="ev">
+          <p>&ldquo;${e.t}&rdquo;</p>
+          <div class="src"><b>${e.src}</b> &middot; ${e.when}</div>
+        </div>`).join('')}
+    </div>`;
+
+  if (s.missing && s.missing.length) h += `
+    <div class="sec">
+      <h3>Missing perspectives</h3>
+      <p class="hint">What this reading does not include</p>
+      <button type="button" class="missing" data-missing="1">
+        <ul>${s.missing.map(m => `<li>${m}</li>`).join('')}</ul>
+        <div class="tap">Show the gaps on the canvas →</div>
+      </button>
+    </div>`;
+
+  if (s.evolution && s.evolution.length) h += `
+    <div class="sec">
+      <h3>Signal evolution</h3>
+      <p class="hint">How this pattern emerged and spread</p>
+      <div class="evo">
+        ${s.evolution.map(e => `
+          <div class="evo-step ${e.now ? 'now' : ''}">
+            <div class="when">${e.when}</div>
+            <div class="what">${e.what}</div>
+            <div class="det">${e.det}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  if (s.questions && s.questions.length) h += `
+    <div class="sec">
+      <h3>Emerging questions</h3>
+      <p class="hint">Starting points for team discussion</p>
+      <ul class="qlist">${s.questions.map(q => `<li>${q}</li>`).join('')}</ul>
+    </div>`;
+
+  h += `<button type="button" class="cta" id="startSession">Start sensemaking session</button>`;
+
+  const panel = document.getElementById('panel');
+  panel.innerHTML = h;
+  panel.scrollTop = 0;
+
+  panel.querySelectorAll('[data-prove]').forEach(n => n.addEventListener('click', () => proveClaim(s.id)));
+  panel.querySelectorAll('[data-missing]').forEach(n => n.addEventListener('click', flagMissing));
+  panel.querySelector('#startSession').addEventListener('click', () => openSession(s));
+}
+
+/* ---------- sensemaking session ---------- */
+const sessionEl = document.getElementById('session');
+const expState = {};
+let sessionOpener = null;
+
+function openSession(s) {
+  sessionOpener = document.activeElement;
+  document.getElementById('sessTitle').textContent = 'Sensemaking Session';
+  document.getElementById('sessLede').textContent =
+    `${s.title || s.label} — facilitated discussion based on ${s.obs || (s.evidence || []).length} observations`;
+
+  document.getElementById('sessPrompts').innerHTML =
+    (s.questions || []).map(q => `<li>${q}</li>`).join('');
+
+  const st = expState[s.id] = expState[s.id] || { interp: '', items: [] };
+  document.getElementById('interpBox').value = st.interp;
+  renderExperiments(s.id);
+
+  sessionEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  sessionEl.dataset.signal = s.id;
+  document.getElementById('sessBack').focus();
+}
+
+function closeSession() {
+  const id = sessionEl.dataset.signal;
+  if (id && expState[id]) expState[id].interp = document.getElementById('interpBox').value;
+  sessionEl.hidden = true;
+  document.body.style.overflow = '';
+  if (sessionOpener && sessionOpener.isConnected) sessionOpener.focus();
+}
+
+function renderExperiments(id) {
+  const st = expState[id];
+  const list = document.getElementById('expList');
+  list.innerHTML = st.items.map(e => `
+    <li>
+      <div class="exp-what">${e.what}</div>
+      <div class="exp-meta">${e.who || 'Unassigned'} &middot; ${e.when || 'no duration set'}</div>
+    </li>`).join('');
+  document.getElementById('expEmpty').hidden = st.items.length > 0;
+}
+
+document.getElementById('sessBack').addEventListener('click', closeSession);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !sessionEl.hidden) closeSession();
+});
+
+document.getElementById('expAdd').addEventListener('click', () => {
+  const id = sessionEl.dataset.signal;
+  const what = document.getElementById('expWhat');
+  const who  = document.getElementById('expWho');
+  const when = document.getElementById('expWhen');
+  const status = document.getElementById('expStatus');
+
+  if (!what.value.trim()) {
+    status.textContent = 'Add a description before saving the experiment.';
+    what.focus();
+    return;
+  }
+  expState[id].items.push({ what: what.value.trim(), who: who.value.trim(), when: when.value.trim() });
+  what.value = who.value = when.value = '';
+  renderExperiments(id);
+  status.textContent = 'Experiment added.';
+  what.focus();
+});
+
+/* ---------- theme ---------- */
+const themeBtn = document.getElementById('themeBtn');
+const root = document.documentElement;
+
+function currentTheme() {
+  return root.dataset.theme
+      || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+function applyTheme(t) {
+  root.dataset.theme = t;
+  themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  document.getElementById('themeIcon').innerHTML = t === 'dark'
+    ? '<circle cx="10" cy="10" r="3.4"/><path d="M10 2v2M10 16v2M18 10h-2M4 10H2M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4M15.7 15.7l-1.4-1.4M5.7 5.7L4.3 4.3"/>'
+    : '<path d="M16 11.2A6.5 6.5 0 0 1 8.8 4a6.5 6.5 0 1 0 7.2 7.2z"/>';
+  try { localStorage.setItem('loom-theme', t); } catch (e) { /* private mode */ }
+}
+try {
+  const saved = localStorage.getItem('loom-theme');
+  if (saved) root.dataset.theme = saved;
+} catch (e) { /* private mode */ }
+applyTheme(currentTheme());
+themeBtn.addEventListener('click', () => applyTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+
+/* ---------- zoom ---------- */
+let zoom = 1;
+const layer = document.getElementById('zoomLayer');
+function applyZoom() {
+  layer.setAttribute('transform', `translate(${CX - CX * zoom} ${CY - CY * zoom}) scale(${zoom})`);
+  document.getElementById('zVal').textContent = Math.round(zoom * 100) + '%';
+}
+document.getElementById('zIn').onclick  = () => { zoom = Math.min(1.6, zoom + 0.1); applyZoom(); };
+document.getElementById('zOut').onclick = () => { zoom = Math.max(0.6, zoom - 0.1); applyZoom(); };
+
+/* ---------- frame fit ----------
+   The design is authored at a fixed 1600x1000 and scaled to fit the window, so
+   the product always presents at 16:10 and a screenshot of the frame needs no
+   cropping or padding. Below STACK_AT the CSS releases the frame and the
+   stacked layout takes over, so no scaling is applied there. */
+const STACK_AT = 1200;
+const frameEl = document.getElementById('frame');
+function fitFrame() {
+  if (innerWidth <= STACK_AT) { frameEl.style.removeProperty('--s'); return; }
+  frameEl.style.setProperty('--s', Math.min(innerWidth / 1600, innerHeight / 1000));
+}
+addEventListener('resize', fitFrame);
+fitFrame();
+
+/* ---------- boot ---------- */
+document.getElementById('sigCount').textContent = SIGNALS.length;
+document.getElementById('obsCount').textContent = SIGNALS.reduce((a, s) => a + s.obs, 0);
+select('roadmap');
+</script>
+</body>
+</html>

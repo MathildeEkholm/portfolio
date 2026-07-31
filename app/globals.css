@@ -14,6 +14,14 @@
   --line: rgba(0, 0, 0, 0.1);
   --line-soft: rgba(0, 0, 0, 0.05);
   --glass: rgba(255, 255, 255, 0.55);
+  /* availability signal, deliberately a true green rather than brand teal */
+  --signal: #16a34a;
+  --signal-bg: #dcfce7;
+  --signal-fg: #14532d;
+  --signal-glow: rgba(22, 163, 74, 0.35);
+  /* inverted CTA: desaturated teal glass, deep teal label */
+  --cta-bg: rgba(178, 220, 213, 0.5);
+  --cta-fg: #14514f;
 }
 
 .dark {
@@ -28,6 +36,12 @@
   --line: rgba(255, 255, 255, 0.14);
   --line-soft: rgba(255, 255, 255, 0.08);
   --glass: rgba(18, 29, 28, 0.55);
+  --signal: #4ade80;
+  --signal-bg: rgba(74, 222, 128, 0.14);
+  --signal-fg: #86efac;
+  --signal-glow: rgba(74, 222, 128, 0.22);
+  --cta-bg: rgba(108, 197, 189, 0.16);
+  --cta-fg: #9fe0d6;
 }
 
 @theme inline {
@@ -42,14 +56,31 @@
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
   --color-glass: var(--glass);
+  --color-signal: var(--signal);
+  --color-signal-bg: var(--signal-bg);
+  --color-signal-fg: var(--signal-fg);
+  --color-cta-bg: var(--cta-bg);
+  --color-cta-fg: var(--cta-fg);
   --font-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
   background: var(--surface);
   color: var(--ink);
   font-family: var(--font-sans), sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 @keyframes overlay-in {
@@ -72,8 +103,154 @@ body {
   }
 }
 
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(14%, -12%) scale(1.15);
+  }
+  66% {
+    transform: translate(-10%, 10%) scale(0.92);
+  }
+}
+
+@keyframes sheen {
+  from {
+    transform: translateX(-60%) skewX(-14deg);
+  }
+  to {
+    transform: translateX(260%) skewX(-14deg);
+  }
+}
+
+/* Ring expands in the dot's own colour, which now sits on a tinted rather than
+   solid pill. */
+@keyframes status-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 60%, transparent);
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+    opacity: 0.55;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 1;
+  }
+}
+
+@keyframes idle-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(-0.45deg);
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+/* node arrival: the dot lands, with a ring breaking away from it */
+@keyframes node-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes node-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@utility animate-node-pop {
+  animation: node-pop 0.45s cubic-bezier(0.34, 1.4, 0.5, 1) both;
+}
+
+@utility animate-node-ring {
+  animation: node-ring 0.7s ease-out both;
+}
+
+/* Runs -50% -> 0 so the strip travels left to right. The track holds two
+   identical groups, so landing on -50% is visually identical to 0. */
+@keyframes marquee {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee 240s linear infinite;
+}
+
 @utility animate-overlay-in {
   animation: overlay-in 0.2s ease-out;
+}
+
+@utility animate-idle-float {
+  animation: idle-float 5.5s ease-in-out infinite;
+}
+
+@utility animate-nudge {
+  animation: nudge 2.8s ease-in-out infinite;
+}
+
+@utility animate-blob-drift {
+  animation: blob-drift 14s ease-in-out infinite;
+}
+
+@utility animate-sheen {
+  animation: sheen 1.1s cubic-bezier(0.3, 0.7, 0.3, 1) 0.35s both;
+}
+
+@utility animate-status-pulse {
+  animation: status-pulse 2.4s ease-out infinite;
+}
+
+@utility animate-row-in {
+  animation: row-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @utility animate-modal-in {

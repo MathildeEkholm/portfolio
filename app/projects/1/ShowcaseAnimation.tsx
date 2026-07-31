@@ -79,19 +79,30 @@ export default function ShowcaseAnimation() {
   useEffect(() => {
     if (!rootRef.current) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduced) return;
 
     let panelLoopActive = false;
 
-    const transformFor = (kind: "left" | "center", progress: number) => {
+    const transformFor = (
+      kind: "left" | "center",
+      progress: number,
+      isMobile: boolean,
+    ) => {
       const eased = easeInOutCubic(progress);
-      const x = kind === "left" ? -150 * (1 - eased) : 0;
-      const y = (kind === "left" ? 300 : 320) * (1 - eased);
-      const rotY = 18 * (1 - eased);
-      const rotZ = (kind === "left" ? -8 : 8) * (1 - eased);
-      const z = 150 * (1 - eased);
-      const scale = 0.75 + 0.25 * eased;
+      // On a short viewport most of the scroll is spent mid-pose, so the entry
+      // rotation reads as a permanently crooked phone. Damp the angles and the
+      // travel there; desktop keeps the full pose.
+      const tilt = isMobile ? 0.3 : 1;
+      const travel = isMobile ? 0.45 : 1;
+      const x = kind === "left" ? -150 * travel * (1 - eased) : 0;
+      const y = (kind === "left" ? 300 : 320) * travel * (1 - eased);
+      const rotY = 18 * tilt * (1 - eased);
+      const rotZ = (kind === "left" ? -8 : 8) * tilt * (1 - eased);
+      const z = 150 * travel * (1 - eased);
+      const scale = (isMobile ? 0.88 : 0.75) + (isMobile ? 0.12 : 0.25) * eased;
       return {
         transform: `perspective(1200px) translateX(${x}px) translateY(${y}px) translateZ(${z}px) rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${scale})`,
         opacity: Math.min(1, progress * 2),
@@ -151,7 +162,7 @@ export default function ShowcaseAnimation() {
           Math.min(1, (rect.top - start) / (end - start)),
         );
 
-        const result = transformFor(screen.anim, progress);
+        const result = transformFor(screen.anim, progress, isMobile);
         screenContainer.style.transform = result.transform;
         screenContainer.style.opacity = String(result.opacity);
 
@@ -166,7 +177,8 @@ export default function ShowcaseAnimation() {
         } else if (progress < 0.87) {
           textOpacity = 1;
         } else {
-          textOpacity = 1 - easeInOutCubic(Math.min(1, (progress - 0.87) / 0.08));
+          textOpacity =
+            1 - easeInOutCubic(Math.min(1, (progress - 0.87) / 0.08));
         }
         textContainer.style.opacity = isMobile
           ? "1"
@@ -345,7 +357,13 @@ export default function ShowcaseAnimation() {
                     strokeLinecap="round"
                   >
                     <circle cx="12" cy="12" r="8.5" />
-                    <circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3.5"
+                      fill="currentColor"
+                      stroke="none"
+                    />
                   </svg>
                   <span>Start recording training</span>
                 </div>

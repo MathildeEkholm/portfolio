@@ -2,6 +2,7 @@ import Image from "next/image";
 import SiteHeader from "../components/SiteHeader";
 import ProjectsGrid from "../components/ProjectsGrid";
 import Recommendation from "./Recommendation";
+import ProcessTimeline from "./ProcessTimeline";
 
 export default function Process() {
   const processSteps = [
@@ -41,34 +42,60 @@ export default function Process() {
     <main className="flex min-h-screen flex-col">
       <SiteHeader />
 
-      <section className="bg-surface pb-20 pt-28 sm:pt-32">
+      <section className="bg-surface pb-20 pt-36 sm:pt-44">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
+          {/* text column gets the wider share; both columns start at the top */}
+          <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-[1.15fr_0.85fr]">
             <div>
-              <h1 className="text-4xl font-semibold leading-tight text-brand sm:text-5xl">
+              {/* stepped down at md, where the column is narrowest, so the
+                  title holds one line at every width */}
+              <h1 className="text-3xl font-semibold leading-tight text-brand sm:text-4xl md:text-3xl lg:text-4xl">
                 From Insight to Impact
               </h1>
               <div className="mt-10 space-y-6">
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  I design digital products by simplifying complex systems into clear, usable experiences.
+                  I design digital products by simplifying complex systems into
+                  clear, usable experiences.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  My work follows the Design Thinking methodology: empathise, define, ideate, prototype and test. In practice it is rarely linear: I move between understanding users, framing the problem and testing ideas, letting each round of feedback reshape the direction.
+                  My work follows the Design Thinking methodology: empathise,
+                  define, ideate, prototype and test. In practice it is rarely
+                  linear: I move between understanding users, framing the
+                  problem and testing ideas, letting each round of feedback
+                  reshape the direction.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  I use AI as a thinking partner throughout, synthesising research, exploring more concepts than I could alone and building prototypes faster, while the decisions stay grounded in what real users need.
+                  I use AI as a thinking partner throughout, synthesising
+                  research, exploring more concepts than I could alone and
+                  building prototypes faster, while the decisions stay grounded
+                  in what real users need.
                 </p>
                 <p className="text-lg leading-relaxed text-ink-muted">
-                  I combine research, prototyping and continuous testing to move from insight to working solutions.
+                  I combine research, prototyping and continuous testing to move
+                  from insight to working solutions.
                 </p>
               </div>
             </div>
-            <div className="flex justify-center md:justify-end">
-              <div className="relative aspect-square w-[95%] overflow-hidden rounded-2xl">
+            <div className="flex flex-col items-center gap-5 md:items-end">
+              {/* same aspect ratio as the workshop shot below, so the two
+                  render at equal heights. object-position sits below centre,
+                  which takes most of the crop off the top and a little off
+                  the bottom. */}
+              <div className="relative aspect-[3/2] w-[85%] overflow-hidden rounded-2xl md:w-full">
                 <Image
                   src="/images/presenting.png"
                   alt="Presenting and user research"
                   fill
+                  sizes="(max-width: 768px) 85vw, 380px"
+                  className="object-cover object-[center_65%]"
+                />
+              </div>
+              <div className="relative aspect-[3/2] w-[85%] overflow-hidden rounded-2xl md:w-full">
+                <Image
+                  src="/images/strava/codesign-workshop.png"
+                  alt="Co-design workshop: printed app screens laid out and rearranged on a table"
+                  fill
+                  sizes="(max-width: 768px) 85vw, 380px"
                   className="object-cover"
                 />
               </div>
@@ -83,38 +110,16 @@ export default function Process() {
             <h2 className="mb-16 text-3xl font-semibold text-brand">
               My Process
             </h2>
-            <div className="space-y-12">
-              {processSteps.map((step, index) => (
-                <div key={index} className="flex gap-4 border-l-2 border-brand pl-4 sm:gap-8 sm:pl-8">
-                  <div className="flex-shrink-0">
-                    <span className="text-4xl font-bold text-brand opacity-50">
-                      {step.number}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-brand">
-                      {step.title}
-                    </h3>
-                    <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ProcessTimeline steps={processSteps} />
           </div>
         </div>
       </section>
 
       <section className="bg-surface-muted py-20">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <h2 className="text-3xl font-semibold text-brand">Projects</h2>
-          <div className="mt-16">
-            <ProjectsGrid />
-          </div>
+          <ProjectsGrid />
         </div>
       </section>
-
     </main>
   );
 }

@@ -98,14 +98,12 @@
     background: var(--paper); overflow: hidden;
   }
   .frame {
-    /* absolute centring, because the unscaled box is larger than the viewport
-       and grid/flex centring refuses to overflow it symmetrically */
-    position: absolute; top: 50%; left: 50%;
-    width: 1600px; height: 1000px;
-    transform: translate(-50%, -50%) scale(var(--s, 1));
-    transform-origin: center center;
-    box-shadow: 0 24px 70px -30px rgba(0,0,0,.35);
-    border-radius: 6px; overflow: hidden;
+    /* Fills the viewport rather than being a fixed 1600x1000 box scaled to
+       fit. The rail and detail panel are fixed track widths in .app, so all
+       the extra width lands on the 1fr canvas column, which is the point. */
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
   }
 
   /* ---------------- shell ---------------- */
@@ -244,7 +242,13 @@
     border: 1px solid var(--line); border-radius: 999px;
     padding: 9px 18px; font-size: 11px; color: var(--ink-2);
   }
-  .legend i { display: inline-block; width: 9px; height: 9px; margin-right: 6px; vertical-align: -1px; }
+  /* Each item is its own inline-flex row, so the swatch sits beside the label
+     instead of the flex row shrinking the item until the text wraps under it. */
+  .legend > span {
+    display: inline-flex; align-items: center; gap: 6px;
+    flex: none; white-space: nowrap;
+  }
+  .legend i { display: block; width: 9px; height: 9px; flex: none; }
   .k-signal { border-radius: 50%; background: var(--green-deep); }
   .k-shared { border-radius: 50%; border: 1.3px solid var(--green); }
   .k-unver  { border-radius: 50%; border: 1.3px dashed var(--green-mid); }
@@ -274,7 +278,7 @@
   .zoom span { width: 38px; text-align: center; }
 
   /* ---------------- detail panel ---------------- */
-  .panel { overflow-y: auto; padding: 22px 24px 40px; background: var(--surface); }
+  .panel { overflow-y: auto; padding: 22px 24px 0; background: var(--surface); }
   .panel::-webkit-scrollbar { width: 8px; }
   .panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
 
@@ -353,6 +357,15 @@
   .evo-step .what { font-size: 12px; margin: 2px 0 1px; font-weight: 500; }
   .evo-step .det { font-size: 11px; color: var(--ink-3); line-height: 1.45; }
 
+  /* Sticky rather than fixed: it stays pinned to the bottom of the scrolling
+     panel without being torn out of it. Solid background and a top rule so it
+     reads as a footer, with content passing cleanly behind it. */
+  .cta-dock {
+    position: sticky; bottom: 0; z-index: 5;
+    margin: 18px -24px 0; padding: 14px 24px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
   .cta {
     width: 100%; border: 1px solid var(--green-deep); background: var(--green-deep); color: #fff;
     border-radius: 8px; padding: 11px; font-size: 12.5px; font-family: var(--font);
@@ -1227,7 +1240,7 @@ function renderPanel(s) {
       <ul class="qlist">${s.questions.map(q => `<li>${q}</li>`).join('')}</ul>
     </div>`;
 
-  h += `<button type="button" class="cta" id="startSession">Start sensemaking session</button>`;
+  h += `<div class="cta-dock"><button type="button" class="cta" id="startSession">Start sensemaking session</button></div>`;
 
   const panel = document.getElementById('panel');
   panel.innerHTML = h;
@@ -1346,8 +1359,9 @@ document.getElementById('zOut').onclick = () => { zoom = Math.max(0.6, zoom - 0.
 const STACK_AT = 1200;
 const frameEl = document.getElementById('frame');
 function fitFrame() {
-  if (innerWidth <= STACK_AT) { frameEl.style.removeProperty('--s'); return; }
-  frameEl.style.setProperty('--s', Math.min(innerWidth / 1600, innerHeight / 1000));
+  /* The frame is fluid now; nothing to scale. Kept so the resize listener and
+     the stacked-layout breakpoint stay in one place. */
+  frameEl.style.removeProperty('--s');
 }
 addEventListener('resize', fitFrame);
 fitFrame();

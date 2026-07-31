@@ -5,18 +5,20 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 import DocumentModal from "./DocumentModal";
+import ContactModal from "./ContactModal";
 import Logo from "./Logo";
 
 const navLinks = [
   { label: "Overview", href: "/" },
+  { label: "Projects", href: "/projects" },
   { label: "Approach", href: "/process" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export default function SiteHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -36,9 +38,7 @@ export default function SiteHeader() {
   }
 
   const isActive = (href: string) =>
-    href === "/"
-      ? pathname === "/" || pathname.startsWith("/projects")
-      : pathname.startsWith(href);
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   // Shared glass treatment, faded in once the page starts scrolling.
   const glass = `transition-all duration-300 ${
@@ -91,6 +91,15 @@ export default function SiteHeader() {
             <li>
               <button
                 type="button"
+                onClick={() => setContactOpen(true)}
+                className={`${itemBase} cursor-pointer text-brand hover:bg-brand-muted/50`}
+              >
+                Contact
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
                 onClick={() => setResumeOpen(true)}
                 className={`${itemBase} cursor-pointer text-brand hover:bg-brand-muted/50`}
               >
@@ -117,7 +126,10 @@ export default function SiteHeader() {
           onClick={() => setMenuOpen((open) => !open)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
-          style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+          style={{
+            touchAction: "manipulation",
+            WebkitTapHighlightColor: "transparent",
+          }}
           className={`relative z-50 flex h-13 w-13 cursor-pointer items-center justify-center rounded-full text-brand ${glassHover}`}
         >
           {menuOpen ? (
@@ -174,6 +186,18 @@ export default function SiteHeader() {
                     type="button"
                     onClick={() => {
                       setMenuOpen(false);
+                      setContactOpen(true);
+                    }}
+                    className="block w-full cursor-pointer rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-brand transition-colors duration-200 hover:bg-brand-muted/50"
+                  >
+                    Contact
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
                       setResumeOpen(true);
                     }}
                     className="block w-full cursor-pointer rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-brand transition-colors duration-200 hover:bg-brand-muted/50"
@@ -189,6 +213,8 @@ export default function SiteHeader() {
           </div>
         )}
       </div>
+
+      {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
 
       {resumeOpen && (
         <DocumentModal

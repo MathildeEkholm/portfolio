@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SiteHeader from "../../components/SiteHeader";
 import ShowcaseAnimation from "./ShowcaseAnimation";
+import ScreenMarquee from "./ScreenMarquee";
 
 const mockups = [
   { src: "/images/strava/01-training.png", label: "Training" },
@@ -51,25 +52,9 @@ export default function StravaCaseStudy() {
               relevance over feature density.
             </p>
           </div>
-
-          <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
-            {mockups.map((mockup) => (
-              <figure key={mockup.label}>
-                <Image
-                  src={mockup.src}
-                  alt={`${mockup.label} screen of the Strava redesign`}
-                  width={804}
-                  height={1748}
-                  sizes="(max-width: 768px) 50vw, 240px"
-                  className="h-auto w-full drop-shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
-                />
-                <figcaption className="mt-4 text-center text-sm font-medium text-ink">
-                  {mockup.label}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
         </div>
+
+        <ScreenMarquee screens={mockups} />
       </section>
 
       <section className="bg-surface-muted py-20">
@@ -93,10 +78,10 @@ export default function StravaCaseStudy() {
                 The Academic Exploration
               </h3>
               <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-                Through my bachelor project, I conducted co-design research
-                with interviews and workshops. Participants shaped their own
-                fitness tracking experience, and the insights became three
-                personalized design concepts for different user archetypes.
+                Through my bachelor project, I conducted co-design research with
+                interviews and workshops. Participants shaped their own fitness
+                tracking experience, and the insights became three personalized
+                design concepts for different user archetypes.
               </p>
             </div>
             <div>
@@ -144,12 +129,11 @@ export default function StravaCaseStudy() {
               The Original Challenge
             </h3>
             <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-              Fitness tracking apps like Strava rely on standardized
-              interfaces that fail to accommodate the diversity of individual
-              users. While users engage for motivation and self-improvement,
-              their needs and relationships to data vary
-              significantly, creating a gap between user and technology that
-              reduces motivation and relevance.
+              Fitness tracking apps like Strava rely on standardized interfaces
+              that fail to accommodate the diversity of individual users. While
+              users engage for motivation and self-improvement, their needs and
+              relationships to data vary significantly, creating a gap between
+              user and technology that reduces motivation and relevance.
             </p>
           </div>
 
@@ -159,17 +143,17 @@ export default function StravaCaseStudy() {
                 Process: Co-design Approach
               </h3>
               <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-                Using co-design methods, interviews, and workshops,
-                participants designed their own fitness tracking experience
-                using print-outs, paper, and pencils. These insights were
-                translated into three personalized concepts reflecting
-                different values, motivations, and preferences.
+                Using co-design methods, interviews, and workshops, participants
+                designed their own fitness tracking experience using print-outs,
+                paper, and pencils. These insights were translated into three
+                personalized concepts reflecting different values, motivations,
+                and preferences.
               </p>
               <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-                The main challenge was designing for individuality rather
-                than generalization. Instead of creating one
-                &ldquo;optimal&rdquo; solution, the project explored multiple
-                parallel designs to reflect the diversity of user needs.
+                The main challenge was designing for individuality rather than
+                generalization. Instead of creating one &ldquo;optimal&rdquo;
+                solution, the project explored multiple parallel designs to
+                reflect the diversity of user needs.
               </p>
             </div>
             <figure className="mt-10">
@@ -198,8 +182,8 @@ export default function StravaCaseStudy() {
                 className="h-auto w-full rounded-2xl"
               />
               <figcaption className="mt-4 text-sm text-ink-subtle">
-                Personalized redesign concept developed with one of the
-                research participants
+                Personalized redesign concept developed with one of the research
+                participants
               </figcaption>
             </figure>
             <div>
@@ -207,18 +191,19 @@ export default function StravaCaseStudy() {
                 Solution: Personalized Concepts
               </h3>
               <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-                The solution consists of three personalized UI concepts
-                designed to reflect different user needs, motivations, and
-                behaviors. Rather than a single standardized interface, each
-                concept improves clarity and relevance by aligning the
-                interface with the user&apos;s personal goals and
-                preferences.
+                The solution consists of three personalized UI concepts designed
+                to reflect different user needs, motivations, and behaviors.
+                Rather than a single standardized interface, each concept
+                improves clarity and relevance by aligning the interface with
+                the user&apos;s personal goals and preferences.
               </p>
             </div>
           </div>
 
           <div className="mt-16 rounded-2xl bg-surface-muted p-8 sm:p-10">
-            <h3 className="text-xl font-semibold text-brand">Intended Impact</h3>
+            <h3 className="text-xl font-semibold text-brand">
+              Intended Impact
+            </h3>
             <ul className="mt-8 space-y-4">
               <li className="flex items-start gap-3">
                 <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-brand" />
@@ -232,10 +217,10 @@ export default function StravaCaseStudy() {
                 <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-brand" />
                 <p className="text-lg leading-relaxed text-ink-muted">
                   <span className="font-medium text-ink">Product Impact:</span>{" "}
-                  With the new design, I explored how the personalized
-                  concepts can be integrated into one cohesive experience.
-                  Further validation would test how well that direction holds
-                  up in real use.
+                  With the new design, I explored how the personalized concepts
+                  can be integrated into one cohesive experience. Further
+                  validation would test how well that direction holds up in real
+                  use.
                 </p>
               </li>
             </ul>
@@ -245,13 +230,13 @@ export default function StravaCaseStudy() {
 
       <section className="bg-surface-muted pt-20">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <h2 className="text-3xl font-semibold text-brand">
+          {/* one size down on mobile so it holds a single line at 390px */}
+          <h2 className="text-2xl font-semibold text-brand sm:text-3xl">
             The Redesign in Motion
           </h2>
         </div>
         <ShowcaseAnimation />
       </section>
-
     </main>
   );
 }

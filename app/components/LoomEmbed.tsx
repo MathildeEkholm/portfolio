@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-// The prototype is authored at a fixed 1600x1000 (16:10). We give the iframe
-// that exact viewport so it renders its full desktop layout, then scale the
-// whole frame down to whatever width the page gives us.
+// The prototype's own layout is fluid now, but embedded in the page it still
+// gets a wide virtual viewport and is scaled down to the column. At the
+// column's real width it would drop into its stacked sub-1200px layout, and
+// the fixed-width rail and detail panel would leave the canvas almost nothing.
+// Opened in its own tab it fills the window properly.
 const DESIGN_W = 1600;
 const DESIGN_H = 1000;
 
@@ -72,25 +74,45 @@ export default function LoomEmbed({ src, poster, alt }: Props) {
         )}
       </div>
 
-      <p className="mt-3 text-sm text-ink-subtle">
-        {interactive ? (
-          <>
-            Live prototype. Hover a signal to isolate it, click{" "}
-            <span className="text-brand">show me</span> to see the observations
-            behind an AI claim, or start a sensemaking session.{" "}
-          </>
-        ) : (
-          <>Prototype is best viewed on a larger screen. </>
-        )}
+      {/* caption and link share a row; the copy is short enough to hold one
+          line at the column's width, and wraps below the link only on narrow
+          screens */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <p className="text-sm text-ink-subtle">
+          {interactive ? (
+            <>
+              Live prototype — hover a signal to isolate it, or click{" "}
+              <span className="text-brand">show me</span> to trace a claim.
+            </>
+          ) : (
+            <>Prototype is best viewed on a larger screen.</>
+          )}
+        </p>
         <a
           href={src}
           target="_blank"
           rel="noreferrer"
-          className="text-brand underline underline-offset-2 hover:opacity-80"
+          className="group inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium text-brand ring-1 ring-line transition-all duration-200 hover:bg-brand-muted/40 hover:ring-brand/50"
         >
-          Open in a new tab ↗
+          Open in a new tab
+          {/* arrow leaving a box, matching the external-link icon elsewhere */}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="transition-transform duration-200 group-hover:-translate-y-px group-hover:translate-x-px motion-reduce:transition-none"
+          >
+            <path d="M13 9.5v3a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 2 12.5v-8A1.5 1.5 0 0 1 3.5 3h3" />
+            <path d="M9.5 2H14v4.5M14 2 7.5 8.5" />
+          </svg>
         </a>
-      </p>
+      </div>
     </div>
   );
 }

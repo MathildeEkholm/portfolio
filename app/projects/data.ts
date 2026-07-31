@@ -77,7 +77,7 @@ export const projects: Record<string, Project> = {
   },
   "3": {
     id: 3,
-    title: "LOOM: Designing AI for Organizational Sensemaking",
+    title: "Designing AI for Organizational Sensemaking",
     category: "AI & Product Design",
     year: "2026",
     description:
